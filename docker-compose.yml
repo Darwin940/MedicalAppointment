@@ -1,0 +1,12 @@
+services:
+  webdatos:
+    container_name: web_datos
+
+    volumes:
+      - ./Data/public:/var/www/html
+
+    build:
+      context: .
+      dockerfile: ./Data/Dockerfile
+    ports:
+      - 8080:80
