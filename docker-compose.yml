@@ -3,7 +3,7 @@ services:
     container_name: web_datos
 
     volumes:
-      - ./Data/public:/var/www/html
+      - ./Data/public:/var/www/html/public
 
     build:
       context: .
