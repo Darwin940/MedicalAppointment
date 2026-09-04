@@ -11,5 +11,7 @@ Content-Type: application/json
     "especialidad_id": 1,
 "nombre_completo": "Juan Pérez",
 "licencia": "LIC-12345",
-"telefono": "123-456-7890"
+"telefono": "123-456-7890",
+"username": "juan.perez",
+"password": "12345678"
 }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Medico extends Model {
     protected $table = 'medicos';
-    public $timestamps = false;
+    public $timestamps = false; //Cambios en la tabla no se registran en la base de datos
 
     protected $fillable = [
         'usuario_id',
