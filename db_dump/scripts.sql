@@ -1,3 +1,6 @@
+
+SET NAMES utf8mb4;
+
 -- Tablas del Sistema
 CREATE TABLE roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -7,7 +10,7 @@ CREATE TABLE roles (
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     rol_id INT NOT NULL,
     activo BOOLEAN DEFAULT 1,
     FOREIGN KEY (rol_id) REFERENCES roles(id)
@@ -15,10 +18,12 @@ CREATE TABLE usuarios (
 
 CREATE TABLE pacientes (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL, -- Vinculado para login
     cedula VARCHAR(20) NOT NULL UNIQUE,
     nombre_completo VARCHAR(150) NOT NULL,
     fecha_nacimiento DATE NOT NULL,    
-    telefono VARCHAR(20)
+    telefono VARCHAR(20),
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
 );
 
 CREATE TABLE especialidades (
@@ -28,7 +33,7 @@ CREATE TABLE especialidades (
 
 CREATE TABLE medicos (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT, -- Vinculado para login
+    usuario_id INT NOT NULL, -- Vinculado para login
     especialidad_id INT NOT NULL,
     nombre_completo VARCHAR(150) NOT NULL,
     licencia VARCHAR(50) NOT NULL UNIQUE,
@@ -96,3 +101,16 @@ BEGIN
     ORDER BY c.fecha_hora DESC;
 END //
 DELIMITER ;
+
+USE medical_appointments;
+
+insert into roles(nombre) values ('Admin');
+insert into roles(nombre) values ('Médico');
+insert into roles(nombre) values ('Paciente');
+
+insert into especialidades (nombre) values 
+    ('Dermatología'),
+    ('Medicina General'),
+    ('Cardiología'),
+    ('Pediatría');
+
