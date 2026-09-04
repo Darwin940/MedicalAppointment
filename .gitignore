@@ -1,0 +1,18 @@
+# Dependencias PHP
+Data/vendor/
+
+# Entorno y secretos (no subir credenciales reales)
+Data/.env
+db_password.txt
+*.env
+
+# Datos de MySQL en local (volúmenes / backups)
+mysql/
+mysql_backup/
+
+# Sistema / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
