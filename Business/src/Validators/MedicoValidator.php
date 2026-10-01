@@ -53,7 +53,7 @@ final class MedicoValidator {
             $regla = $config['regla'];
             $mensaje = $config['mensaje'];
             if ($campo === 'telefono' && ($valor === null || $valor === "")) {
-                continue; // Permitir que el campo teléfono sea opcional
+                continue;
             }
             if ($regla->validate($valor)->hasFailed()) {
                 $errores[$campo] = $mensaje;

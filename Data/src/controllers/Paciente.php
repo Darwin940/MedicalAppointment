@@ -36,7 +36,6 @@ class Paciente {
 
     public function filter(Request $request, Response $response, array $args): Response {
         $this->container->get('eloquent');
-        //?? coalescing operator to provide default values if offset or limit are not provided
         $offset = filter_var($args['offset'] ?? 0, FILTER_VALIDATE_INT);
         $limit = filter_var($args['limit'] ?? 20, FILTER_VALIDATE_INT);
         if ($offset === false || $offset < 0 || $limit === false || $limit < 1 || $limit > 100) {
@@ -46,7 +45,6 @@ class Paciente {
         }
 
         $params = $request->getQueryParams();
-        //Operador de coalescencia nula (??) para proporcionar valores predeterminados si los parámetros no están presentes
         $cedula = trim((string) ($params['cedula'] ?? ''));
         $name = trim((string) ($params['nombre'] ?? $params['nombre_completo'] ?? ''));
 
@@ -164,7 +162,6 @@ class Paciente {
     }
 
     public function update(Request $request, Response $response, array $args): Response {
-        // Implementation for updating a Paciente record would go here.
         $eloquent = $this->container->get('eloquent');
         if (isset($args['id'])) {
             $paciente = PacienteModel::find($args['id']);
@@ -175,8 +172,6 @@ class Paciente {
 
             $data = $request->getParsedBody();
             $data = is_array($data) ? $data : [];
-/*             var_dump($data); // Debugging line to inspect the parsed body data
-            die(); // Stop execution for debugging purposes */
 
             if (isset($data['nombre_completo'])) {
                 $fullName = trim((string) $data['nombre_completo']);
@@ -215,7 +210,6 @@ class Paciente {
                 return $this->json($response, ['error' => 'Paciente no encontrado.'], 404);
             }
 
-            // Verificar si el paciente tiene citas asignadas
             $citasCount = $eloquent->table('citas')
                 ->where('paciente_id', $paciente->id)
                 ->count();
@@ -225,13 +219,10 @@ class Paciente {
             }
 
             $eloquent->connection()->transaction(static function () use ($paciente): void {
-                // Obtener el ID del usuario asociado antes de eliminar el paciente
                 $usuarioId = $paciente->usuario_id;
                 
-                // Eliminar el paciente
                 $paciente->delete();
                 
-                // Eliminar el usuario relacionado
                 if ($usuarioId !== null) {
                     $usuario = User::find($usuarioId);
                     if ($usuario !== null) {

@@ -1,4 +1,3 @@
--- Tablas del Sistema
 SET NAMES utf8mb4;
 
 CREATE TABLE roles (
@@ -17,7 +16,7 @@ CREATE TABLE usuarios (
 
 CREATE TABLE pacientes (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT, -- Vinculado para login
+    usuario_id INT,
     cedula VARCHAR(20) NOT NULL UNIQUE,
     nombre_completo VARCHAR(150) NOT NULL,
     fecha_nacimiento DATE NOT NULL,    
@@ -32,7 +31,7 @@ CREATE TABLE especialidades (
 
 CREATE TABLE medicos (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT NOT NULL, -- Vinculado para login
+    usuario_id INT NOT NULL,
     especialidad_id INT NOT NULL,
     nombre_completo VARCHAR(150) NOT NULL,
     licencia VARCHAR(50) NOT NULL UNIQUE,
@@ -43,7 +42,7 @@ CREATE TABLE medicos (
 
 CREATE TABLE administradores (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT, -- Vinculado para login
+    usuario_id INT,
     nombre_completo VARCHAR(150) NOT NULL,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
@@ -59,7 +58,6 @@ CREATE TABLE citas (
     FOREIGN KEY (medico_id) REFERENCES medicos(id)
 );
 
--- Procedimiento Almacenado: Agendar Cita con validación
 DELIMITER //
 CREATE PROCEDURE sp_crear_cita(
     IN p_paciente_id INT,
@@ -71,7 +69,6 @@ CREATE PROCEDURE sp_crear_cita(
 BEGIN
     DECLARE v_existe INT;
 
-    -- Verificar que el médico no tenga otra cita en esa hora exacta
     SELECT COUNT(*) INTO v_existe 
     FROM citas 
     WHERE medico_id = p_medico_id 
@@ -87,7 +84,6 @@ BEGIN
     END IF;
 END //
 
--- SP para obtener citas de un paciente
 CREATE PROCEDURE sp_obtener_citas_paciente(
     IN p_paciente_id INT
 )
@@ -100,7 +96,6 @@ BEGIN
     ORDER BY c.fecha_hora DESC;
 END //
 
--- SP para obtener citas de un paciente
 CREATE PROCEDURE sp_obtener_citas_medico(
     IN m_medico_id INT
 )
@@ -114,8 +109,6 @@ END //
 
 DELIMITER ;
 
--- Esto es temporal
-
 use citas_medicas;
 
 insert into roles (nombre) values ('Administrador');
@@ -125,10 +118,3 @@ insert into roles (nombre) values ('Paciente');
 insert into especialidades (nombre) values ('Cardiología');
 insert into especialidades (nombre) values ('Dermatología');
 insert into especialidades (nombre) values ('Pediatría');
-
-
--- insert into medicos (especialidad_id, nombre_completo, licencia, telefono) 
-
--- values (1, 'Dr. Juan Pérez', 'LIC12345', '555-1234'),
---        (2, 'Dra. María López', 'LIC67890', '555-5678'),
---       (3, 'Dr. Carlos Gómez', 'LIC54321', '555-9876');

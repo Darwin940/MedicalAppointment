@@ -22,10 +22,6 @@ final class DataService {
         return $this->client->request('GET', ltrim($path, '/'),
             ['query' => $query]);
     }
- /*    public function filter(string $path, array $query = []) {
-        return $this->client->request('GET', ltrim($path, '/'),
-            ['query' => $query]);
-    } */
     public function post(string $path, string $body): ResponseInterface {
         return $this->client->request('POST', ltrim($path, '/'),
             ['body' => $body,

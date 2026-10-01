@@ -177,7 +177,6 @@ class Medico {
     }
 
     public function update(Request $request, Response $response, array $args): Response {
-        // Implementation for updating a Medico record would go here.
         $eloquent = $this->container->get('eloquent');
         if (isset($args['id'])) {
             $medico = MedicoModel::find($args['id']);
@@ -234,7 +233,6 @@ class Medico {
             if ($medico === null) {
                 return $this->json($response, ['error' => 'Médico no encontrado.'], 404);
             }
-            //Verificar si el médico a eliminar tenga citas asignadas
             $citasCount = $eloquent->table('citas')
                 ->where('medico_id', $medico->id)
                 ->count();
@@ -243,13 +241,10 @@ class Medico {
                 return $this->json($response, ['error' => 'No se puede eliminar al médico porque tiene citas asignadas'], 409);
             }
             $eloquent->connection()->transaction(static function() use ($medico) : void {
-                //Obtener el ID del usuario asociado al médico antes de elminar
                 $usuarioId = $medico->usuario_id;
 
-                //Eliminar el médico
                 $medico->delete();
 
-                //Eliminar el usuario relacionado
                 if ($usuarioId !== null) {
                     $usuario = User::find($usuarioId);
                     if ($usuario !== null) {
