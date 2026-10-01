@@ -39,6 +39,7 @@ $app->group('/api', function(RouteCollectorProxy $api) {
     $api->group('/paciente', $pacienteRoutes);
 
     $citasRoutes = function(RouteCollectorProxy $endpoint) {
+        $endpoint->get('[/{id}]', Citas::class . ':read');
         $endpoint->get('/paciente/{id}', Citas::class . ':readPaciente');
         $endpoint->get('/medico/{id}', Citas::class . ':readMedico');
         $endpoint->post('', Citas::class . ':create');

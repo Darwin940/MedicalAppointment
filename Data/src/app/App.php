@@ -27,6 +27,17 @@ $errorMiddleware->setErrorHandler(
         return $response->withHeader('Content-Type', 'application/json; charset=utf-8');
     }
 );
+$errorMiddleware->setErrorHandler(
+    \Slim\Exception\HttpMethodNotAllowedException::class,
+    function ($request, \Slim\Exception\HttpMethodNotAllowedException $exception, bool $displayErrorDetails) use ($app) {
+        $response = $app->getResponseFactory()->createResponse(405);
+        $response->getBody()->write(json_encode([
+            'error' => 'Método no permitido.',
+            'metodos_permitidos' => $exception->getAllowedMethods()
+        ], JSON_UNESCAPED_UNICODE));
+        return $response->withHeader('Content-Type', 'application/json; charset=utf-8');
+    }
+);
 
 require_once "routes.php";
 require_once "config.php";

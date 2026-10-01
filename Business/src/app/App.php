@@ -29,23 +29,6 @@ require_once "routes.php";
 $app->add(new JwtAuthentication(
 	new Options(isSecure: false),
 	new FirebaseDecoder(new Secret($_ENV['KEY'], 'HS256')),
-	[new RequestPathRule(['/'], ['/api/auth/login'])]
-));
-
-$errorMiddleware = $app->addErrorMiddleware(true, true, true);
-$errorMiddleware->setErrorHandler(AuthorizationException::class,
-	function ($request, AuthorizationException $exception, bool $displayErrorDetails) use ($app) {
-		$response = $app->getResponseFactory()->createResponse(401);
-		$response->getBody()->write(json_encode([
-			'error' => 'Token inválido o ausente.',
-		], JSON_UNESCAPED_UNICODE));
-		return $response->withHeader('Content-Type', 'application/json; charset=utf-8');
-	}
-);
-
-$app->add(new JwtAuthentication(
-	new Options(isSecure: false),
-	new FirebaseDecoder(new Secret($_ENV['KEY'], 'HS256')),
 	[new RequestPathRule(
         ['/'], 
         ['/api/auth/login', '/api/medicos', '/api/medico'])]
@@ -60,6 +43,27 @@ $errorMiddleware->setErrorHandler(AuthorizationException::class,
 		], JSON_UNESCAPED_UNICODE));
 		return $response->withHeader('Content-Type', 'application/json; charset=utf-8');
 	}
+);
+$errorMiddleware->setErrorHandler(
+    \Slim\Exception\HttpNotFoundException::class,
+    function ($request, $exception, bool $displayErrorDetails) use ($app) {
+        $response = $app->getResponseFactory()->createResponse(404);
+        $response->getBody()->write(json_encode([
+            'error' => 'Ruta no encontrada.'
+        ], JSON_UNESCAPED_UNICODE));
+        return $response->withHeader('Content-Type', 'application/json; charset=utf-8');
+    }
+);
+$errorMiddleware->setErrorHandler(
+    \Slim\Exception\HttpMethodNotAllowedException::class,
+    function ($request, \Slim\Exception\HttpMethodNotAllowedException $exception, bool $displayErrorDetails) use ($app) {
+        $response = $app->getResponseFactory()->createResponse(405);
+        $response->getBody()->write(json_encode([
+            'error' => 'Método no permitido.',
+            'metodos_permitidos' => $exception->getAllowedMethods()
+        ], JSON_UNESCAPED_UNICODE));
+        return $response->withHeader('Content-Type', 'application/json; charset=utf-8');
+    }
 );
 
 $app->run();

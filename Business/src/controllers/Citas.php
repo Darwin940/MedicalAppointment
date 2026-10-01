@@ -14,8 +14,26 @@ class Citas {
 
     public function __construct(private ContainerInterface $container) {}
 
+    public function read(Request $request, Response $response, array $args): Response {
+        try {
+            $dataService = $this->container->get(DataService::class);
+            $path = isset($args['id']) ? 'citas/' . rawurlencode($args['id']) : 'citas';
+
+            $upstream = $dataService->get($path);
+            $response->getBody()->write((string) $upstream->getBody());
+            return $response
+                ->withHeader(
+                    'Content-Type', $upstream->getHeaderLine('Content-Type') ?: 'application/json; charset=utf-8')
+                ->withStatus($upstream->getStatusCode());
+        } catch (ConnectException){
+            return $this->json($response, ['error' => 'El servicio de datos no está disponible'], 502);
+        }
+        catch (RequestException){
+            return $this->json($response, ['error' => 'No se pudo consultar el servicio de datos'], 502);
+        }
+    }
+
     public function readPaciente(Request $request, Response $response, array $args): Response {
-        
         try {
             $dataService = $this->container->get(DataService::class);
             $path = isset($args['id']) ? 'citas/paciente/' . rawurlencode($args['id']) : 'citas/paciente';

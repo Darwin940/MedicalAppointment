@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\controllers;
 
+use App\Models\CitasModel;
 use Illuminate\Database\QueryException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -11,9 +12,26 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class Citas
 {
-    
-
     public function __construct(private ContainerInterface $container)   {  }
+
+    public function read(Request $request, Response $response, array $args): Response
+    {
+        $this->container->get('eloquent');
+        if (isset($args['id'])) {
+            $citaId = filter_var($args['id'], FILTER_VALIDATE_INT);
+            if ($citaId === false || $citaId < 1) {
+                return $this->json($response, ['error' => 'id debe ser un entero positivo.'], 422);
+            }
+            $cita = CitasModel::find($citaId);
+            if ($cita === null) {
+                return $this->json($response, ['error' => 'Cita no encontrada.'], 404);
+            }
+            return $this->json($response, ['data' => $cita], 200);
+        }
+
+        $citas = CitasModel::all();
+        return $this->json($response, ['data' => $citas], 200);
+    }
 
     public function create(Request $request, Response $response, array $args): Response
     {
