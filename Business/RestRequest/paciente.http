@@ -1,0 +1,38 @@
+@host = http://localhost:9090/api
+@uri = {{host}}/pacientes
+#@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJsb2NhbGhvc3QiLCJpYXQiOjE3Nzg0MzE2NjQsImV4cCI6MTc3ODQzMzQ2NCwic3ViIjoiNy0xMjM0LTU2NzgiLCJyb2wiOjMsIm5vbSI6Ikx1aXMgV2VzdCJ9.kPq1MSyAXEKDX9hfJRc_9SmJqexUI08fBDolaQfwH7E
+
+GET {{uri}}
+
+#Authorization: Bearer {{token}}
+###
+
+POST {{uri}}
+#Authorization: Bearer {{token}}
+Content-Type: application/json
+
+ {
+    "nombre_completo": "Lulehiska West sd",
+    "cedula": "501234567812",
+    "telefono": "8888-7773",
+    "fecha_nacimiento" : "2000-09-21",
+    "username": "vanesawest",
+    "password": "securepas#1D"
+  }
+###
+
+PUT {{uri}}/1
+#Authorization: Bearer {{token}}
+Content-Type: application/json
+
+ {
+    "nombre_completo": "Luis Aramando West G",
+    "telefono": "8888-7775",
+    "fecha_nacimiento" : "2000-09-15"
+  }
+###
+DELETE {{uri}}/1
+###
+
+GET {{uri}}/filter/0/10?nombre=luk&cedula=&especialidad=
+#Authorization: Bearer {{token}} 

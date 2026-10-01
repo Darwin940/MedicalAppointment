@@ -1,7 +1,6 @@
-
+-- Tablas del Sistema
 SET NAMES utf8mb4;
 
--- Tablas del Sistema
 CREATE TABLE roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL UNIQUE
@@ -18,12 +17,12 @@ CREATE TABLE usuarios (
 
 CREATE TABLE pacientes (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT NOT NULL, -- Vinculado para login
+    usuario_id INT, -- Vinculado para login
     cedula VARCHAR(20) NOT NULL UNIQUE,
     nombre_completo VARCHAR(150) NOT NULL,
     fecha_nacimiento DATE NOT NULL,    
     telefono VARCHAR(20),
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
 CREATE TABLE especialidades (
@@ -38,7 +37,7 @@ CREATE TABLE medicos (
     nombre_completo VARCHAR(150) NOT NULL,
     licencia VARCHAR(50) NOT NULL UNIQUE,
     telefono VARCHAR(20),
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     FOREIGN KEY (especialidad_id) REFERENCES especialidades(id)
 );
 
@@ -46,7 +45,7 @@ CREATE TABLE administradores (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT, -- Vinculado para login
     nombre_completo VARCHAR(150) NOT NULL,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
 CREATE TABLE citas (
@@ -100,17 +99,36 @@ BEGIN
     WHERE c.paciente_id = p_paciente_id
     ORDER BY c.fecha_hora DESC;
 END //
+
+-- SP para obtener citas de un paciente
+CREATE PROCEDURE sp_obtener_citas_medico(
+    IN m_medico_id INT
+)
+BEGIN
+    SELECT c.id, c.fecha_hora, c.estado, c.motivo, p.nombre_completo AS paciente
+    FROM citas c
+    INNER JOIN pacientes p ON c.paciente_id = p.id
+    WHERE c.medico_id = m_medico_id
+    ORDER BY c.fecha_hora DESC;
+END //
+
 DELIMITER ;
 
-USE medical_appointments;
+-- Esto es temporal
 
-insert into roles(nombre) values ('Admin');
-insert into roles(nombre) values ('Médico');
-insert into roles(nombre) values ('Paciente');
+use citas_medicas;
 
-insert into especialidades (nombre) values 
-    ('Dermatología'),
-    ('Medicina General'),
-    ('Cardiología'),
-    ('Pediatría');
+insert into roles (nombre) values ('Administrador');
+insert into roles (nombre) values ('Médico');
+insert into roles (nombre) values ('Paciente');
 
+insert into especialidades (nombre) values ('Cardiología');
+insert into especialidades (nombre) values ('Dermatología');
+insert into especialidades (nombre) values ('Pediatría');
+
+
+-- insert into medicos (especialidad_id, nombre_completo, licencia, telefono) 
+
+-- values (1, 'Dr. Juan Pérez', 'LIC12345', '555-1234'),
+--        (2, 'Dra. María López', 'LIC67890', '555-5678'),
+--       (3, 'Dr. Carlos Gómez', 'LIC54321', '555-9876');

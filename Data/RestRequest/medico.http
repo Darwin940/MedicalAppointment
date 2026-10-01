@@ -1,0 +1,37 @@
+@host = http://localhost:8080/api
+@uri = {{host}}/medicos
+#@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJsb2NhbGhvc3QiLCJpYXQiOjE3Nzg0MzE2NjQsImV4cCI6MTc3ODQzMzQ2NCwic3ViIjoiNy0xMjM0LTU2NzgiLCJyb2wiOjMsIm5vbSI6Ikx1aXMgV2VzdCJ9.kPq1MSyAXEKDX9hfJRc_9SmJqexUI08fBDolaQfwH7E
+
+GET {{uri}}
+
+#Authorization: Bearer {{token}}
+###
+
+POST {{uri}}
+#Authorization: Bearer {{token}}
+Content-Type: application/json
+
+ {
+    "especialidad_id": 1,
+    "nombre_completo": "Lulehiska West Cooper",
+    "licencia": "LIC-123455",
+    "telefono": "8888-7771",
+    "username": "luluwest",
+    "password": "securepassword"
+  }
+###
+
+PUT {{uri}}/7
+#Authorization: Bearer {{token}}
+Content-Type: application/json
+
+ {
+    "nombre_completo": "Wilfred West Grant",
+    "telefono": "8888-7775j"
+  }
+###
+DELETE {{uri}}/1
+###
+
+GET {{uri}}/filter/0/10?nombre=lu&cedula=&especialidad=car
+#Authorization: Bearer {{token}} 

@@ -1,3 +1,2 @@
 <?php
-require __DIR__ . '/../src/app/App.php';
-
+    require "../src/app/App.php";

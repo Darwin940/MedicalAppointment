@@ -1,0 +1,24 @@
+@host = http://localhost:9090/api
+@uri = {{host}}/citas
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJjaXRhcy1tZWRpY2FzLWJ1c2luZXNzIiwiaWF0IjoxNzkwNzM4OTc0LCJleHAiOjE3OTA3NDI1NzQsInN1YiI6IjEiLCJ1c2VybmFtZSI6Imx1bHV3ZXN0Iiwicm9sX2lkIjoyfQ.pHPKJqCBpiIU_E4GddI3O81Njbpn4SN6pLK-S6kAcZ4
+
+GET {{uri}}/paciente/1
+Authorization: Bearer {{token}}
+###
+
+GET {{uri}}/medico/2
+Authorization: Bearer {{token}}
+###
+
+POST {{uri}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+ {
+    "paciente_id": 2,
+    "medico_id": 2,
+    "fecha_hora": "2026-10-15 11:00:00",
+    "motivo" : "Consulta de dolor lumbar"
+  }
+###
+

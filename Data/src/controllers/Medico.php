@@ -2,27 +2,100 @@
 
 namespace App\controllers;
 
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
-
-use Psr\Container\ContainerInterface;
-// SOLUCIÓN Error 2: Se importa el modelo Eloquent App\Models\Medico con el alias
-// MedicoModel. Sin este 'use', PHP buscaba 'App\controllers\MedicoModel' (no existía)
-// y lanzaba "Class App\controllers\MedicoModel not found".
 use App\Models\Medico as MedicoModel;
 use App\Models\User;
 use Illuminate\Database\QueryException;
-use RuntimeException;
-
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Container\ContainerInterface;
 
 class Medico {
-    private $container;
-    public function __construct(ContainerInterface $c){
+    private ContainerInterface $container;
+
+    public function __construct(ContainerInterface $c) {
         $this->container = $c;
     }
+
+    public function read(Request $request, Response $response, array $args): Response {
+        $this->container->get('eloquent');
+
+        if (isset($args['id'])) {
+            $medicos = MedicoModel::query()
+                ->select(['medicos.id', 'especialidad_id', 'especialidades.nombre as nombre_especialidad', 'nombre_completo', 'licencia', 'telefono'])
+                ->join('especialidades', 'medicos.especialidad_id', '=', 'especialidades.id')
+                ->find($args['id']);
+
+            return $this->json($response, ['data' => $medicos], 200);            
+        }
+
+        $medicos = MedicoModel::query()
+            ->select(['id', 'especialidad_id', 'nombre_completo', 'licencia', 'telefono'])
+            ->get()
+            ->toArray();
+        return $this->json($response, ['data' => $medicos], 200);
+    }
+
+    public function filter(Request $request, Response $response, array $args): Response {
+        $this->container->get('eloquent');
+
+        $offset = filter_var($args['offset'] ?? 0, FILTER_VALIDATE_INT);
+        $limit = filter_var($args['limit'] ?? 20, FILTER_VALIDATE_INT);
+
+        if ($offset === false || $offset < 0 || $limit === false || $limit < 1 || $limit > 100) {
+           return $this->json($response,
+                ['error' => 'El offset debe ser mayor o igual a 0 y el límite deber estar entre 1 y 100'],
+                422);
+        }
+        $params = $request->getQueryParams();
+        $name = trim ((string) ($params['nombre'] ?? $params['nombre_completo']));
+        $license = trim ((string) ($params['licencia'] ?? $params['cedula']));
+        $speciality = trim ((string) ($params['especialidad'] ?? null));
+
+        $query = MedicoModel::query()
+            ->select([
+                'medicos.id',
+                'medicos.nombre_completo',
+                'medicos.especialidad_id',
+                'especialidades.nombre as especialidad_nombre',
+                'medicos.licencia',
+                'medicos.telefono'
+            ])
+            ->join('especialidades', 'medicos.especialidad_id', '=', 'especialidades.id');
+
+            if($name !== '') {
+                $query->where('medicos.nombre_completo', 'like', "%{$name}%");
+            }
+            if($license !== '') {
+                $query->where('medicos.licencia', 'like', "%{$license}%");
+            }
+            if($speciality !== '') {
+                $query->where('especialidades.nombre', 'like', "%{$speciality}%");
+            }
+
+            $total = (clone $query)->count('medicos.id');
+
+            $medicos = $query 
+             ->orderBy('medicos.nombre_completo')
+             ->offset($offset)
+             ->limit($limit)
+             ->get()
+             ->toArray();
+
+             return $this->json($response, [
+                'data' => $medicos,
+                'pagination' => [
+                    'offset' => $offset,
+                    'limit' => $limit,
+                    'total' => $total
+                ]
+             ], 200);
+    }
+
+
     public function create(Request $request, Response $response, array $args): Response {
         $data = $request->getParsedBody();
-        $data = is_array($data) ? $data : [];
+        
+        $data = is_array($data) ? $data : [];  
 
         $errors = [];
         $specialtyId = filter_var($data['especialidad_id'] ?? null, FILTER_VALIDATE_INT);
@@ -67,7 +140,7 @@ class Medico {
                         ->value('id');
 
                     if ($roleId === null) {
-                        throw new RuntimeException('El rol Médico no está configurado.');
+                        throw new \RuntimeException('El rol Médico no está configurado.');
                     }
 
                     $user = User::create([
@@ -102,26 +175,100 @@ class Medico {
 
         return $this->json($response, ['data' => $medico->toArray()], 201);
     }
-    private function json(response $response, array $payload, int $status): Response {
-        $response->getBody()->write(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
+
+    public function update(Request $request, Response $response, array $args): Response {
+        // Implementation for updating a Medico record would go here.
+        $eloquent = $this->container->get('eloquent');
+        if (isset($args['id'])) {
+            $medico = MedicoModel::find($args['id']);
+
+            if ($medico === null) {
+                return $this->json($response, ['error' => 'Médico no encontrado.'], 404);
+            }
+
+            $data = $request->getParsedBody();
+            $data = is_array($data) ? $data : [];
+
+            if (isset($data['nombre_completo'])) {
+                $fullName = trim((string) $data['nombre_completo']);
+                if ($fullName === '' || mb_strlen($fullName) > 150) {
+                    return $this->json($response, ['error' => 'Nombre completo inválido.'], 422);
+                }
+                $medico->nombre_completo = $fullName;
+            }
+            if (isset($data['telefono'])) {
+                $phone = trim((string) $data['telefono']);
+             
+                if ($phone !== null && mb_strlen($phone) > 20) {
+                    return $this->json($response, ['error' => 'Teléfono inválido.'], 422);
+                }
+                $medico->telefono = $phone;
+            }
+            if (isset($data['especialidad_id'])) {
+                $specialty_Id = filter_var($data['especialidad_id'] ?? null, FILTER_VALIDATE_INT);
+                if ($specialty_Id === false || $specialty_Id === null || $specialty_Id < 1) {
+                    return $this->json($response, ['error' => 'Especialidad inválida.'], 422);
+                }
+                $medico->especialidad_id = $specialty_Id;
+            }
+
+            if (isset($data['licencia'])) {
+                $specialty_Id = trim((string) $data['especialidad_id']);
+             
+                if ($license === '' || mb_strlen($license) > 50) {
+                    return $this->json($response, ['error' => 'Especialidad inválida.'], 422);
+                }
+                $medico->especialidad_id = $specialty_Id;
+            }            
+            $medico->save();
+
+            return $this->json($response, ['data' => $medico->toArray()], 200);
+        }
+    }
+
+    public function delete(Request $request, Response $response, array $args): Response {
+        $eloquent = $this->container->get('eloquent');
+        if (isset($args['id'])) {
+            $medico = MedicoModel::find($args['id']);
+
+            if ($medico === null) {
+                return $this->json($response, ['error' => 'Médico no encontrado.'], 404);
+            }
+            //Verificar si el médico a eliminar tenga citas asignadas
+            $citasCount = $eloquent->table('citas')
+                ->where('medico_id', $medico->id)
+                ->count();
+
+            if ($citasCount > 0) {
+                return $this->json($response, ['error' => 'No se puede eliminar al médico porque tiene citas asignadas'], 409);
+            }
+            $eloquent->connection()->transaction(static function() use ($medico) : void {
+                //Obtener el ID del usuario asociado al médico antes de elminar
+                $usuarioId = $medico->usuario_id;
+
+                //Eliminar el médico
+                $medico->delete();
+
+                //Eliminar el usuario relacionado
+                if ($usuarioId !== null) {
+                    $usuario = User::find($usuarioId);
+                    if ($usuario !== null) {
+                        $usuario->delete();
+                    }
+                }
+            });
+            return $this->json($response, ['message' => 'Médico eliminado exitosamente'], 200);
+        }
+    }   
+
+    private function json(Response $response, array $payload, int $status): Response {
+        $response->getBody()->write(json_encode(
+            $payload,
+            JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR
+        ));
+
         return $response
             ->withHeader('Content-Type', 'application/json; charset=utf-8')
             ->withStatus($status);
     }
-
-    public function read(Request $request, Response $response, array $args){
-        // SOLUCIÓN Error 1: Se eliminó la llamada $this->container->get('eloquent') porque
-        // Eloquent ya se bootea al arrancar la app (en App.php). Aquí se usa el modelo directamente.
-        $medicos = MedicoModel::query()
-        ->select(['id','especialidad_id', 'nombre_completo', 'licencia', 'telefono'])
-        ->get()
-        ->toArray();
-        
-
-        $response->getBody()->write(json_encode(["data" => $medicos], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
-
-        return $response
-        ->withHeader('Content-Type', 'application/json; charset=utf-8')
-        ->withStatus(200);
-    } 
 }
