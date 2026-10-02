@@ -2,11 +2,13 @@ FROM node:24-alpine AS build
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci
+RUN npm install -g pnpm@12.8.1
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml* ./
+RUN pnpm install --frozen-lockfile
 
 COPY . .
-RUN npm run build -- --configuration production --output-path=/app/dist
+RUN pnpm run build -- --configuration production --output-path=/app/dist
 
 FROM nginx:alpine
 

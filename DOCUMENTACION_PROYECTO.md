@@ -59,7 +59,7 @@ Toda la infraestructura está automatizada mediante **Docker** y **Docker Compos
    - En `db`: La carpeta `./mysql` preserva los datos del motor aunque el contenedor se destruya. `./db_dump` ejecuta automáticamente los scripts de creación de base de datos la primera vez que se inicia MySQL.
 3. **Compilación Multi-Stage (Presentación)**:
    - `Presentation/Dockerfile` tiene 2 etapas:
-     1. **Stage 1 (Build)**: Usa `node:24-alpine` para ejecutar `npm run build` y generar los archivos estáticos optimizados (`.js`, `.css`, `.html`).
+     1. **Stage 1 (Build)**: Usa `node:24-alpine` con `pnpm` para ejecutar `pnpm run build` y generar los archivos estáticos optimizados (`.js`, `.css`, `.html`).
      2. **Stage 2 (Servidor)**: Usa `nginx:alpine` para copiar únicamente los archivos resultantes y servirlos con Nginx en el puerto 80, optimizando drásticamente el peso y seguridad de la imagen final.
 
 ---
