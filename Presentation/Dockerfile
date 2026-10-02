@@ -2,27 +2,18 @@ FROM node:24-alpine AS build
 
 WORKDIR /app
 
-RUN npm install -g pnpm@12.8.1
+RUN corepack enable && \
+	corepack prepare pnpm@12.8.1 --activate
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml* ./
 RUN pnpm install --frozen-lockfile
-
 COPY . .
-RUN pnpm run build -- --configuration production --output-path=/app/dist
+RUN pnpm run build --configuration=production --output-path=/app/dist
 
 FROM nginx:alpine
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 COPY --from=build /app/dist/browser/ /usr/share/nginx/html/
-
-RUN printf '%s\n' 'server {' \
-	'  listen 80;' \
-	'  server_name _;' \
-	'  root /usr/share/nginx/html;' \
-	'  index index.html;' \
-	'  location / {' \
-	'    try_files $uri $uri/ /index.html;' \
-	'  }' \
-	'}' > /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
