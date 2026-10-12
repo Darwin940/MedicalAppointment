@@ -1,0 +1,60 @@
+<h2 mat-dialog-title class="py-5! text-center font-bold!">{{ titulo }}</h2>
+<mat-divider class="border-2"></mat-divider>
+
+<mat-dialog-content>
+  <form id="frmMedico" [formRoot]="frmMedico" class="grid gap-4 py-2">
+    <mat-form-field appearance="outline">
+      <mat-label>Especialidad</mat-label>
+      <input matInput type="number" placeholder="ID Especialidad" [formField]="frmMedico.especialidad_id" />
+      @if (frmMedico.especialidad_id().touched() && frmMedico.especialidad_id().invalid()) {
+        <mat-error>Especialidad es requerida</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nombre completo</mat-label>
+      <input matInput placeholder="Nombre del médico" [formField]="frmMedico.nombre_completo" />
+      @if (frmMedico.nombre_completo().touched() && frmMedico.nombre_completo().invalid()) {
+        <mat-error>Nombre completo es requerido</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Licencia</mat-label>
+      <input matInput placeholder="Número de licencia" [formField]="frmMedico.licencia" />
+      @if (frmMedico.licencia().touched() && frmMedico.licencia().invalid()) {
+        <mat-error>Licencia es requerida</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Teléfono</mat-label>
+      <input matInput placeholder="9999-9999" [formField]="frmMedico.telefono!" />
+      @if (frmMedico.telefono!().touched() && frmMedico.telefono!().invalid()) {
+        <mat-error>Formato de teléfono incorrecto</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Usuario</mat-label>
+      <input matInput placeholder="Nombre de usuario" [formField]="frmMedico.username!" />
+      @if (frmMedico.username!().touched() && frmMedico.username!().invalid()) {
+        <mat-error>Nombre de usuario es requerido</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Contraseña</mat-label>
+      <input matInput type="password" placeholder="Contraseña" [formField]="frmMedico.password!" />
+      @if (frmMedico.password!().touched() && frmMedico.password!().invalid()) {
+        <mat-error>Contraseña es requerida</mat-error>
+      }
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-divider class="border-2"></mat-divider>
+<mat-dialog-actions align="end">
+  <button mat-button type="button" [mat-dialog-close]="false">Cancelar</button>
+  <button mat-flat-button color="primary" type="submit" form="frmMedico">Guardar</button>
+</mat-dialog-actions>

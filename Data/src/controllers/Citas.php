@@ -103,6 +103,7 @@ class Citas
         $status = sizeOf($citas) > 0 ? 200 : 404;
         return $this->json($response, ['data' => $citas], $status);
     }
+
     public function readMedico(Request $request, Response $response, array $args): Response
     {
         $doctorId = filter_var($args['id'] ?? $request->getQueryParams()['medico_id'] ?? null, FILTER_VALIDATE_INT);
@@ -118,6 +119,45 @@ class Citas
         $status = sizeOf($citas) > 0 ? 200 : 404;
         return $this->json($response, ['data' => $citas], $status);
     }
+
+    public function update(Request $request, Response $response, array $args): Response
+    {
+        $eloquent = $this->container->get('eloquent');
+        $cita = CitasModel::find($args['id'] ?? null);
+        if ($cita === null) {
+            return $this->json($response, ['error' => 'Cita no encontrada.'], 404);
+        }
+
+        $data = $request->getParsedBody();
+        $data = is_array($data) ? $data : [];
+        $changes = array_intersect_key($data, array_flip(['paciente_id', 'medico_id', 'fecha_hora', 'motivo']));
+
+        $updatedDoctorId = $changes['medico_id'] ?? $cita->medico_id;
+        $updatedDateTime = $changes['fecha_hora'] ?? $cita->fecha_hora;
+        if (
+            $cita->estado === 'Programada'
+            && CitasModel::query()
+                ->where('medico_id', $updatedDoctorId)
+                ->where('fecha_hora', $updatedDateTime)
+                ->where('estado', 'Programada')
+                ->where('id', '<>', $cita->id)
+                ->exists()
+        ) {
+            return $this->json($response, ['error' => 'El médico ya tiene una cita programada en ese horario.'], 409);
+        }
+
+        try {
+            $cita->fill($changes);
+            $cita->save();
+        } catch (QueryException $exception) {
+            return $this->json($response, [
+                'error' => 'No fue posible actualizar la cita. Verifique que el paciente y el médico existan.',
+            ], 422);
+        }
+
+        return $this->json($response, ['data' => $cita->toArray()], 200);
+    }
+
     private function json(Response $response, array $payload, int $status): Response
     {
         $response->getBody()->write(json_encode(

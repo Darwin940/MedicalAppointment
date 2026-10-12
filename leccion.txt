@@ -1,0 +1,8 @@
+- Completar botonera en médico component
+- Arreglar el código ts agregando los diferentes métodos que se usaran
+- Crear el formulario cliente - 
+    - Ventana modal
+    - Agregar formulario
+        - Crear los modelos types e interfaces
+        - Crear el html en conjunto con el ts para el formulario  (Probar datos retornados) - falta onsubmit
+        - Crear las validaciones
