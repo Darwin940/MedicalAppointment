@@ -24,12 +24,10 @@
                 <mat-list-item class="bg-amber-300! rounded-sm!">persona</mat-list-item>
                 <hr>
                 @for(item of menuItems(); track item.label) {
-                    <mat-list-item [hidden]="!true">
-                        <a href="" [routerLink]="item.route">
-                            <mat-icon>{{item.icon}}</mat-icon>
-                            {{item.label}}
-                        </a>
-                    </mat-list-item>
+                    <a mat-list-item [routerLink]="item.route">
+                        <mat-icon matListItemIcon>{{item.icon}}</mat-icon>
+                        <span matListItemTitle>{{item.label}}</span>
+                    </a>
                 }
             </mat-nav-list>
         </mat-sidenav>

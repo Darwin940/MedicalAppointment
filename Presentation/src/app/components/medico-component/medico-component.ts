@@ -32,15 +32,17 @@ export class MedicoComponent implements OnInit {
   srvMedico = inject(MedicoService);
   dialog = inject(MatDialog);
 
+
+
   constructor() {
-    effect(() => {
+    effect(() => { //Filtra los médicos cada vez que cambian los parámetros de búsqueda
       const respuesta = this.srvMedico.medicos.value();
       if (respuesta !== undefined) {
         this.dataSource.set(respuesta.data);
       }
     });
 
-    effect(() => {
+    effect(() => { // Busca el médico por ID y muestra el diálogo de edición si se encuentra
       const id = this.buscarID();
       const respuesta = this.srvMedico.medicoPorId;
 
@@ -108,8 +110,18 @@ export class MedicoComponent implements OnInit {
             }
           });
         },
-        error: (error) => {
-          this.alertar('error', 'No se pudo guardar el médico', ' Aceptar ');
+        error: (err) => {
+          let mensaje = 'No se pudo guardar el médico';
+          if (err.error?.error) {
+            mensaje = err.error.error;
+          } else if (err.error?.errors) {
+            if (typeof err.error.errors === 'string') {
+              mensaje = err.error.errors;
+            } else if (typeof err.error.errors === 'object') {
+              mensaje = Object.values(err.error.errors).join('\n');
+            }
+          }
+          this.alertar('error', mensaje, ' Aceptar ');
         },
       });
     });
@@ -139,5 +151,6 @@ export class MedicoComponent implements OnInit {
 
   ngOnInit(): void {
     this.resetearFiltro();
+
   }
 }

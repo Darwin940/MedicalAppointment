@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angu
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MedicoCreateInput, MedicoModel } from '../../../shared/models/medico-model';
 import { form, FormField, FormRoot, maxLength, minLength, required, RootFieldContext, SchemaPath, validate } from '@angular/forms/signals';
 
@@ -30,7 +31,7 @@ interface MedicoDialogData {
 @Component({
   imports: [
     MatDialogModule, MatDividerModule, MatButtonModule, MatFormFieldModule, MatInputModule,
-    FormRoot, FormField
+    MatSelectModule, FormRoot, FormField
 ],
   selector: 'app-frm-medico',
   styleUrl: './frm-medico.css',
@@ -43,6 +44,12 @@ export class FrmMedico implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly data = inject<MedicoDialogData>(MAT_DIALOG_DATA);
   readonly isEditing = this.data.data !== undefined;
+
+  especialidades = signal<{ id: number; nombre: string }[]>([
+    { id: 1, nombre: 'Cardiología' },
+    { id: 2, nombre: 'Dermatología' },
+    { id: 3, nombre: 'Pediatría' },
+  ]);
 
   objMedico = signal<MedicoCreateInput>({
     especialidad_id: 0,
@@ -65,7 +72,7 @@ export class FrmMedico implements OnInit {
     });
 
     required(s.nombre_completo, {message: "El nombe es requerido"});
-    minLength(s.nombre_completo, 6, {message: "El nombre debe tener al menos 11 caracteres"});
+    minLength(s.nombre_completo, 11, {message: "El nombre debe tener al menos 11 caracteres"});
     maxLength(s.nombre_completo, 150, {message: "El nombre no puede tener más de 150 caracteres"});
     matchesPattern(s.nombre_completo, /^[A-Za-zÑñÁÉÍÓÚáéíóú]{2,}(?: [A-Za-zÑñÁÉÍÓÚáéíóú]{2,}){1,3}$/, "Formato de nombre inválido");
     required(s.licencia, {message: "Licencia es requerida"});
@@ -81,10 +88,10 @@ export class FrmMedico implements OnInit {
       required(s.password!, {message: 'Contraseña es requerido'});
       minLength(s.password!, 8, {message: "La contraseña debe tener al menos 8 caracteres"});
       maxLength(s.password!, 64, {message: "La contraseña no puede tener más de 64 caracteres"});
-      matchesPattern(s.password!, /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[#$@*])[\s\S]{8,64}$/, "Formato de usuario inválido");
+      matchesPattern(s.password!, /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[#$@*])[\s\S]{8,64}$/, "Formato de contraseña inválido");
     }
 
-    matchesPattern(s.telefono!, /^[2-9][0-9]{3}-[0-9]{4}$/, "Formato de teléfono inválido");
+    matchesPattern(s.telefono!, /^[2-9][0-9]{3}-[0-9]{4}$/, "Formato de teléfono inválido", true);
 
   }, {
     submission: {
