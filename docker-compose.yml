@@ -31,6 +31,7 @@ services:
     volumes:
       - ./Business/public:/var/www/html/public
       - ./Business/src:/var/www/html/src
+      - ./Business/tests:/var/www/html/tests
     build:
       context: .
       dockerfile: ./Business/Dockerfile

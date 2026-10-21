@@ -1,5 +1,0 @@
-allowBuilds:
-  '@parcel/watcher': true
-  esbuild: false
-  lmdb: false
-  msgpackr-extract: false

@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { MedicoComponent } from './medico-component';
+import { vi } from 'vitest';
 
 describe('MedicoComponent', () => {
   let component: MedicoComponent;
@@ -45,5 +46,19 @@ describe('MedicoComponent', () => {
     expect(rows[0].textContent).toContain('Ana Médica');
     expect(rows[0].textContent).toContain('Cardiología');
     expect(rows[0].textContent).toContain('LIC-123');
+  });
+
+  it('should fetch the doctor by ID and pass it to the edit form', async () => {
+    const mostrarDialogo = vi.spyOn(component, 'mostrarDialogo');
+
+    component.onEdit(medico.id);
+    fixture.detectChanges();
+
+    const request = httpTesting.expectOne((httpRequest) => httpRequest.url.endsWith('/api/medicos/1'));
+    request.flush({ data: medico });
+    await fixture.whenStable();
+
+    expect(component.buscarID()).toBe(medico.id);
+    expect(mostrarDialogo).toHaveBeenCalledWith('Editar Médico', medico, false, medico.id);
   });
 });

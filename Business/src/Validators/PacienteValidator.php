@@ -42,7 +42,7 @@ final class PacienteValidator {
             ],
             'telefono' => [
                 'regla' => v::stringType()
-                    ->regex('/^[2-9][0-9]{3}-[0-9 ]{4}$/')
+                    ->regex('/^[2-9][0-9]{3}-[0-9]{4}$/')
                     ->length(v::equals(9)),
                 'mensaje' => 'El teléfono debe tener el formato 0000-0000 y 9 caracteres.',
             ],

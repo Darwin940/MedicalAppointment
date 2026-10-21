@@ -65,3 +65,6 @@
     <button matFab extended>Imprimir <mat-icon>printer</mat-icon></button>
   </mat-card-footer>
 </mat-card>
+
+@if (srvMedico.medicos.isLoading()) { <p>Cargando...</p> }
+@if (srvMedico.medicos.value() === undefined) { <p>Tabla vacía</p> }

@@ -4,9 +4,10 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MedicoService } from '../../shared/services/medico-service';
-import { MedicoModel } from '../../shared/models/medico-model';
+import { MedicoCreateInput, MedicoModel } from '../../shared/models/medico-model';
 import { FrmMedico } from '../forms/frm-medico/frm-medico';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { DialogoGeneral } from '../forms/dialogo-general/dialogo-general';
 
 @Component({
   imports: [MatCardModule, MatButtonModule, MatIconModule, MatTableModule, MatDialogModule],
@@ -15,7 +16,8 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
   templateUrl: './medico-component.html',
 })
 export class MedicoComponent implements OnInit {
-  filtro: { nombre: string; cedula: string; especialidad: string } = { nombre: '', cedula: '', especialidad: '' };
+  buscarID = signal<number | null>(null);
+  filtro : { nombre: string; cedula: string; especialidad: string } = { nombre: '', cedula: '', especialidad: '' };
   displayedColumns: string[] = [
     'id',
     'nombre_completo',
@@ -37,6 +39,23 @@ export class MedicoComponent implements OnInit {
         this.dataSource.set(respuesta.data);
       }
     });
+
+    effect(() => {
+      const id = this.buscarID();
+      const respuesta = this.srvMedico.medicoPorId;
+
+      if (id === null) {
+        return;
+      }
+
+      if (respuesta.status() === 'resolved') {
+        const medico = respuesta.value()?.data;
+        this.mostrarDialogo('Editar Médico', medico!, false, id);
+      } else if (respuesta.status() === 'error') {
+        console.error(`No se pudo buscar el médico con ID ${id}:`, respuesta.error());
+        alert('No se pudo cargar el médico');
+      }
+    });
   }
 
   private resetearFiltro() {
@@ -48,8 +67,20 @@ export class MedicoComponent implements OnInit {
     this.srvMedico.filtrar(this.filtro);
   }
 
-  public mostrarDialogo(titulo: string, datos?: MedicoModel, info?: boolean) {
-    const dialogRef = this.dialog.open(FrmMedico, {
+  private alertar(icono: string, mensaje: string, textoAceptar: string) {
+    this.dialog.open(DialogoGeneral, {
+      width: '30vw',
+      maxWidth: '20rem',
+      data: {
+        icono: icono,
+        texto: mensaje,
+        textoAceptar: textoAceptar
+      }
+    });
+  }
+
+  public mostrarDialogo(titulo: string, datos?: MedicoModel, info?: boolean, id?: number) {
+    const dialogRef = this.dialog.open<FrmMedico, unknown, MedicoCreateInput | false | undefined>(FrmMedico, {
       width: '50vw',
       maxWidth: '35rem',
       data: {
@@ -57,21 +88,41 @@ export class MedicoComponent implements OnInit {
         data: datos,
         info: info
       },
-      disableClose: true
+      disableClose : true
     });
-    dialogRef.afterClosed().subscribe({
-      complete: () => {
-        console.log('Dialogo cerrado');
+    dialogRef.afterClosed().subscribe((medicoCreado) => {
+      if (medicoCreado === undefined || medicoCreado === false) {
+        return;
       }
+
+      this.srvMedico.guardar(medicoCreado, id).subscribe({
+        complete: () => {
+          this.resetearFiltro();
+          this.dialog.open(DialogoGeneral, {
+            width: '30vw',
+            maxWidth: '20rem',
+            data: {
+              icono: 'check',
+              texto: id === undefined ? 'Datos creados' : 'Datos actualizados',
+              textoAceptar: ' Aceptar '
+            }
+          });
+        },
+        error: (error) => {
+          this.alertar('error', 'No se pudo guardar el médico', ' Aceptar ');
+        },
+      });
     });
   }
 
   onCreate() {
-    this.mostrarDialogo('Nuevo Cliente');
+    this.buscarID.set(null);
+    this.mostrarDialogo('Nuevo Médico');
   }
 
-  onEdit(medico: number) {
-    console.log('Editar cliente:', medico);
+  onEdit(id: number) {
+    this.buscarID.set(id);
+    this.srvMedico.buscarPorId(id);
   }
 
   onInfo(medico: number) {
