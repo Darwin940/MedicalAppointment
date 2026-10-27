@@ -34,6 +34,22 @@ final class Auth
         ], 200);
     }
 
+    public function updateTokenRef(Request $request, Response $response, array $args): Response
+    {
+        $data = $request->getParsedBody();
+        $data = is_array($data) ? $data : [];
+
+        $this->container->get('eloquent');
+
+        $user = User::find($args['id']);
+        if ($user !== null) {
+            $user->tkRef = trim((string) ($data['tkRef'] ?? ''));
+            $user->save();
+        }
+
+        return $this->json($response, ['msj' => 'Token refresco modificado'], 200);
+    }
+
     private function json(Response $response, array $payload, int $status): Response
     {
         $response->getBody()->write(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));

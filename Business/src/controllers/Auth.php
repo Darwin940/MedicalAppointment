@@ -54,21 +54,44 @@ final class Auth
                 'username' => $credentials['username'],
                 'rol_id' => (int) $credentials['rol_id'],
             ];
+            $payloadRef = [
+                'iss' => 'citas-medicas-business',
+                'iat' => $now,
+                'sub' => (string) $credentials['id'],
+            ];
+            
+            $token = JWT::encode($payload, $config->key, 'HS256');
+            $tkRef = JWT::encode($payloadRef, $config->key, 'HS256');
+            
+            $upstream = $service->put('auth/tkref/' . $credentials['id'], json_encode([
+                'tkRef' => $tkRef
+            ], JSON_THROW_ON_ERROR));
 
             return $this->json($response, [
-                'token' => JWT::encode($payload, $config->key, 'HS256'),
-                'expires_in' => $config->jwt_ttl,
-                'user' => [
-                    'id' => (int) $credentials['id'],
-                    'username' => $credentials['username'],
-                    'rol_id' => (int) $credentials['rol_id'],
-                ],
+                'token' => $token,
+                'tkRef' => $tkRef,
             ], 200);
         } catch (ConnectException) {
             return $this->json($response, ['error' => 'El servicio de datos no está disponible.'], 502);
         } catch (RequestException) {
             return $this->json($response, ['error' => 'No se pudo consultar el servicio de datos.'], 502);
         }
+    }
+
+    public function logout(Request $request, Response $response, array $args): Response
+    {
+        try {
+            $service = $this->container->get(DataService::class);
+            $upstream = $service->put('auth/tkref/' . $args['id'], json_encode([
+                'tkRef' => ''
+            ], JSON_THROW_ON_ERROR)); 
+                 
+            return $this->json($response, ['msj' => 'Sesión cerrada'], 200);
+        } catch (ConnectException) {
+            return $this->json($response, ['error' => 'El servicio de datos no está disponible.'], 502);
+        } catch (RequestException) {
+            return $this->json($response, ['error' => 'No se pudo consultar el servicio de datos.'], 502);
+        }        
     }
 
     private function json(Response $response, array $payload, int $status): Response

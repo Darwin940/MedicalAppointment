@@ -1,0 +1,26 @@
+El uso de la doble negación (`!!`) en JavaScript y TypeScript sirve para realizar una **conversión explícita a un tipo de dato booleano** 
+(`true` o `false`), en lugar de dejar el resultado como un valor *truthy* o *falsy*.
+
+En la porción de código:
+`return !!this.srvTokens.token && !this.srvTokens.jwtTokenExp();`
+
+La doble negación opera sobre `this.srvTokens.token` por las siguientes razones:
+
+---
+
+### 1. Conversión a Booleano Estricto
+
+`this.srvTokens.token` puede contener diferentes tipos de valores según el estado de la aplicación:
+
+* Si el usuario ha iniciado sesión, probablemente sea un **string** con el token (ej. `"eyJhbGci..."`).
+* Si no hay sesión, puede ser `null`, `undefined` o una cadena vacía `""`.
+
+En JavaScript, estos valores son considerados *falsy* o *truthy*, pero no son booleanos puros.
+
+* Aplicar un solo signo de exclamación (`!this.srvTokens.token`) invierte el valor y lo convierte en booleano (por ejemplo, si es un string devuelve `false`, y si es `null` devuelve `true`).
+* Aplicar el segundo signo (`!!this.srvTokens.token`) vuelve a invertir el resultado para reflejar su estado de verdad original, pero asegurando que el valor devuelto sea estrictamente `true` o `false`.
+
+### 2. ¿Por qué es útil en este contexto?
+
+* **Tipado estricto (TypeScript):** Si la función actual forma parte de un entorno TypeScript con tipado estricto, el tipo de retorno esperado puede ser explícitamente `boolean`. Sin `!!`, TypeScript podría inferir que la función devuelve un `string | null | undefined | boolean`, lo cual puede generar errores de tipado en componentes que consumen este método.
+* **Consistencia lógica:** Garantiza que el operador lógico `&&` opere de manera uniforme entre dos expresiones booleanas claras: `[es true/false que existe el token]` Y `[es true/false que el token NO ha expirado]`.

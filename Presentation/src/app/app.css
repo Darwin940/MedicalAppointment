@@ -40,9 +40,8 @@ section {
 }
 .botonMenu{
     cursor:pointer;
-    padding: 0.65rem 0.65rem;
     border-radius: 50%;
-    display: inline;
+    display: flex;
     align-items: center;
 }
 .botonMenu:hover {

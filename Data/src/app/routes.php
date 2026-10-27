@@ -17,7 +17,10 @@ $app->get('/hello/{name}', function (Request $request, Response $response, array
 });
 
 $app->group('/api', function(RouteCollectorProxy $api) {
-    $api->post('/auth/credentials', Auth::class . ':credentials');    
+    $api->group('/auth', function(RouteCollectorProxy $endpoint) {
+        $endpoint->post('/credentials', Auth::class . ':credentials');  
+        $endpoint->put('/tkref/{id}', Auth::class . ':updateTokenRef');
+    });    
     $medicoRoutes = function(RouteCollectorProxy $endpoint) {
         $endpoint->get('[/{id}]', Medico::class . ':read');
         $endpoint->get('/filter/{offset}/{limit}', Medico::class . ':filter');

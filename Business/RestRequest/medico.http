@@ -1,8 +1,8 @@
 @host = http://localhost:9090/api
 @uri = {{host}}/medicos
-@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJjaXRhcy1tZWRpY2FzLWJ1c2luZXNzIiwiaWF0IjoxNzkwNzM4OTc0LCJleHAiOjE3OTA3NDI1NzQsInN1YiI6IjEiLCJ1c2VybmFtZSI6Imx1bHV3ZXN0Iiwicm9sX2lkIjoyfQ.pHPKJqCBpiIU_E4GddI3O81Njbpn4SN6pLK-S6kAcZ4
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJjaXRhcy1tZWRpY2FzLWJ1c2luZXNzIiwiaWF0IjoxNzkzMTE5OTEzLCJleHAiOjE3OTMxMjM1MTMsInN1YiI6IjEwIiwidXNlcm5hbWUiOiJsdWlzd2VzdDMiLCJyb2xfaWQiOjJ9.FI8OfOdGtWWjqaSjho-loK7ctSEXpdqQEmTywLveTAM
 
-GET {{uri}}/5
+GET {{uri}}
 Authorization: Bearer {{token}}
 ###
 
@@ -12,10 +12,10 @@ Content-Type: application/json
 
  {
     "especialidad_id": 2,
-    "nombre_completo": "Luis Armando West",
-    "licencia": "LIC-123453",
+    "nombre_completo": "Luis Armando West Grant",
+    "licencia": "LIC-125451",
     "telefono": "8888-7771",
-    "username": "luiswest2",
+    "username": "luiswest3",
     "password": "secure1D#"
   }
 ###
@@ -38,6 +38,16 @@ POST http://localhost:9090/api/auth/login
 Content-Type: application/json
 
 {
-    "username": "luluwest",
-    "password": "securepassword"
+    "username": "luiswest3",
+    "password": "secure1D#"
 }
+###
+
+PATCH http://localhost:9090/api/auth/logout/6
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "tkRef": ""
+}
+###
