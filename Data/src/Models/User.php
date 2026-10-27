@@ -17,6 +17,7 @@ class User extends Model
         'password',
         'rol_id',
         'activo',
+        'tkRef',
     ];
 
     protected $hidden = [

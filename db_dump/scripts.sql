@@ -11,6 +11,7 @@ CREATE TABLE usuarios (
     password VARCHAR(255) NOT NULL,
     rol_id INT NOT NULL,
     activo BOOLEAN DEFAULT 1,
+    tkRef VARCHAR(255),
     FOREIGN KEY (rol_id) REFERENCES roles(id)
 );
 

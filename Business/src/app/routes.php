@@ -4,7 +4,10 @@ namespace App\controllers;
 use Slim\Routing\RouteCollectorProxy;
 
 $app->group('/api', function(RouteCollectorProxy $api) {
-    $api->post('/auth/login', Auth::class . ':login');
+    $api->group('/auth', function(RouteCollectorProxy $endpoint) {
+        $endpoint->post('/login', Auth::class . ':login');
+        $endpoint->patch('/logout/{id}', Auth::class . ':logout');
+    });
     $medicoRoutes = function(RouteCollectorProxy $endpoint) {
         $endpoint->get('[/{id}]', Medico::class . ':read');
         $endpoint->get('/filter/{offset}/{limit}', Medico::class . ':filter');
