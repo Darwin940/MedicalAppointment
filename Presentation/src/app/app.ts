@@ -1,16 +1,14 @@
-import { Component, HostListener, signal, inject } from '@angular/core';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { Component, HostListener, inject, signal } from '@angular/core';
 import { RouterModule, RouterOutlet } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatTableModule } from '@angular/material/table';
-import { AuthService } from './shared/services/auth.service';
+import { MatDividerModule } from '@angular/material/divider';
+import { AuthService } from './shared/services/auth-service';
 
 type MenuItem = {
   label : string;
@@ -21,10 +19,8 @@ type MenuItem = {
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterModule,
-    MatToolbarModule, MatMenuModule, MatSidenavModule, MatCheckboxModule, 
-    MatFormFieldModule, MatIconModule, MatDividerModule, MatListModule,
-    MatTableModule, MatTooltipModule,
+  imports: [RouterOutlet, RouterModule, MatToolbarModule, MatIconModule, MatButtonModule,
+    MatTooltipModule, MatMenuModule, MatSidenavModule, MatListModule, MatDividerModule
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'
@@ -32,23 +28,19 @@ type MenuItem = {
 export class App {
   protected readonly title = signal('Presentation');
   protected readonly authService = inject(AuthService);
-  menuItems = signal<MenuItem[]>([
-    {label: 'Inicio', icon: 'home', route:'home', rol :[0, 1 , 2, 3]},
-    {label: 'Medicos', icon: 'group', route:'medico', rol : [0, 1, 3]},
-    {label: 'Pacientes', icon: 'person', route:'paciente', rol :[0, 1]},
-    {label: 'Nueva Cita', icon: 'calendar_month', route:'cita', rol :[0, 1]},
-    {label: 'Cancelar Cita', icon: 'event_busy', route: 'cancelarcita', rol: [0, 1, 2]}
-  ]);
 
-  @HostListener("window:beforeunload") unloadHandler() {
-    this.logout();
+  menuItems: MenuItem[] = [
+    {label: 'Inicio', icon: 'home', route:'home', rol :[1 , 2, 3]},
+    {label: 'Medicos', icon: 'stethoscope', route:'medico', rol : [1, 3]},
+    {label: 'Pacientes', icon: 'personal_injury', route:'paciente', rol :[1]},
+    {label: 'Citas', icon: 'calendar_month', route:'citas', rol :[1]},
+  ];
+
+  @HostListener("window:beforeunload") uloadHandler() {
+    this.loggout();
   }
 
-  logout(){
-    this.authService.logout();
-  }
-
-  logeado() : boolean {
-    return this.authService.isLoggedIn();
+  loggout() {
+    this.authService.loggout();
   }
 }

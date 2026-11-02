@@ -78,7 +78,7 @@ final class Auth
         }
     }
 
-    public function logout(Request $request, Response $response, array $args): Response
+    public function loggout(Request $request, Response $response, array $args): Response
     {
         try {
             $service = $this->container->get(DataService::class);
@@ -92,6 +92,11 @@ final class Auth
         } catch (RequestException) {
             return $this->json($response, ['error' => 'No se pudo consultar el servicio de datos.'], 502);
         }        
+    }
+
+    public function logout(Request $request, Response $response, array $args): Response
+    {
+        return $this->loggout($request, $response, $args);
     }
 
     private function json(Response $response, array $payload, int $status): Response

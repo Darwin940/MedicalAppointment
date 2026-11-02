@@ -6,24 +6,28 @@ export const routes: Routes = [
     { path: '', redirectTo: 'home', pathMatch: 'full'},
     { path: 'home',
         canActivate: [authGuard], data: {roles: [Roles.Admin, Roles.Medico, Roles.Paciente]},
-        loadComponent: () => import('./components/home/home')
-        .then(m => m.Home)
-    },
-    { path: 'login',
-        loadComponent: () => import('./components/login/login')
-        .then(m => m.Login)
+        loadComponent: () => import('./components/home-component/home-component')
+            .then(m => m.HomeComponent)
     },
     { path: 'medico',
-        canActivate: [authGuard], data: {roles: [Roles.Admin, Roles.Medico]},
         loadComponent: () => import('./components/medico-component/medico-component')
-        .then(m => m.MedicoComponent)
-    },
+            .then(m => m.MedicoComponent)
+    }, 
     { path: 'paciente',
-        canActivate: [authGuard], data: {roles: [Roles.Admin, Roles.Medico]},
         loadComponent: () => import('./components/paciente-component/paciente-component')
-        .then(m => m.PacienteComponent)
+            .then(m => m.PacienteComponent)
+    },     
+    { path: 'citas',
+        loadComponent: () => import('./components/citas-component/citas-component')
+            .then(m => m.CitasComponent)
+    },
+    { path: 'login',
+        canActivate: [authGuard], data: {roles: [Roles.Admin, Roles.Medico, Roles.Paciente]},
+        loadComponent: () => import('./components/login-component/login-component')
+            .then(m => m.LoginComponent)
     },    
-    { path: '**', loadComponent: () => import ('./components/error404-component/error404-component')
-        .then(m => m.Error404Component)
+    { path: '**',
+        loadComponent: () => import('./components/error404-component/error404-component')
+            .then(m => m.Error404Component)
     },    
 ];

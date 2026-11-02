@@ -6,8 +6,12 @@ use Slim\Routing\RouteCollectorProxy;
 $app->group('/api', function(RouteCollectorProxy $api) {
     $api->group('/auth', function(RouteCollectorProxy $endpoint) {
         $endpoint->post('/login', Auth::class . ':login');
+        $endpoint->delete('/loggout/{id}', Auth::class . ':loggout');
+        $endpoint->patch('/loggout/{id}', Auth::class . ':loggout');
+        $endpoint->delete('/logout/{id}', Auth::class . ':logout');
         $endpoint->patch('/logout/{id}', Auth::class . ':logout');
     });
+
     $medicoRoutes = function(RouteCollectorProxy $endpoint) {
         $endpoint->get('[/{id}]', Medico::class . ':read');
         $endpoint->get('/filter/{offset}/{limit}', Medico::class . ':filter');

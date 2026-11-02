@@ -1,6 +1,6 @@
 @host = http://localhost:9090/api
 @uri = {{host}}/medicos
-@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJjaXRhcy1tZWRpY2FzLWJ1c2luZXNzIiwiaWF0IjoxNzkzMTE5OTEzLCJleHAiOjE3OTMxMjM1MTMsInN1YiI6IjEwIiwidXNlcm5hbWUiOiJsdWlzd2VzdDMiLCJyb2xfaWQiOjJ9.FI8OfOdGtWWjqaSjho-loK7ctSEXpdqQEmTywLveTAM
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJjaXRhcy1tZWRpY2FzLWJ1c2luZXNzIiwiaWF0IjoxNzkzMjg5OTIzLCJleHAiOjE3OTMyOTM1MjMsInN1YiI6IjEwIiwidXNlcm5hbWUiOiJsdWlzd2VzdDMiLCJyb2xfaWQiOjJ9.VRM1AKufv36tmPHftr5rT5gxITIAoQZ06-TYOaTnh6I
 
 GET {{uri}}
 Authorization: Bearer {{token}}
@@ -43,11 +43,5 @@ Content-Type: application/json
 }
 ###
 
-PATCH http://localhost:9090/api/auth/logout/6
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "tkRef": ""
-}
+DELETE http://localhost:9090/api/auth/loggout/10
 ###
