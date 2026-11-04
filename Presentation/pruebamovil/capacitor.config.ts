@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.luiswest.citasmedicas',
+  appId: 'com.darwincortes.medicalappointments',
   appName: 'CitasMedicas',
   webDir: 'dist/Presentation/browser',
   server: {

@@ -1,4 +1,4 @@
-package com.luiswest.citasmedicas;
+package com.darwincortes.medicalappointments;
 
 import com.getcapacitor.BridgeActivity;
 
