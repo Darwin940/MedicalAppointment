@@ -58,6 +58,21 @@ export class AuthService {
         return !!this.srvTokens.token && !this.srvTokens.jwtTokenExp();
     }
 
+    public refreshSession() : any {
+        if (this.isLoggedIn() && this.srvTokens.tokenTimeToExp() <= 20) {
+            return this.http.patch<IToken>(`${servidor}/refresh/${this.userActual.id}`, { tkRef: this.srvTokens.refreshToken })
+                .pipe(
+                    tap((tokens) => {
+                        this.doLogin(tokens);
+                    }),
+                    map(() => true),
+                    catchError((error) => {
+                        return of(error.status);
+                    })
+                );
+        }
+    }
+
     private get userActual() : User {
         if(!this.srvTokens.token) {
             return new User();

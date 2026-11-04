@@ -33,6 +33,10 @@ export class TokenService {
         localStorage.removeItem(this.REFRESH_TOKEN);
     }
 
+    public removeTokens() : void  {
+        this.eliminarTokens();
+    }
+
     public decodeToken() : any {
         const helper = new JwtHelperService();
         return helper.decodeToken(this.token);

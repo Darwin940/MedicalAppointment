@@ -14,7 +14,6 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-
 $dotenv = Dotenv\Dotenv::createImmutable('/var/www/html');
 $dotenv->load();
 
@@ -88,6 +87,10 @@ $app->add(function (ServerRequestInterface $request, RequestHandlerInterface $ha
 		->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
 		->withHeader('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, Origin, X-Requested-With')
 		->withHeader('Vary', 'Origin');
+});
+
+$app->options('/{routes:.+}', function (ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface {
+	return $response->withStatus(204);
 });
 
 $app->run();

@@ -7,15 +7,14 @@ Authorization: Bearer {{token}}
 ###
 
 POST {{uri}}
-Authorization: Bearer {{token}}
 Content-Type: application/json
 
  {
     "especialidad_id": 2,
     "nombre_completo": "Luis Armando West Grant",
-    "licencia": "LIC-125451",
+    "licencia": "LIC-1254515",
     "telefono": "8888-7771",
-    "username": "luiswest3",
+    "username": "luiswest5",
     "password": "secure1D#"
   }
 ###
@@ -38,10 +37,10 @@ POST http://localhost:9090/api/auth/login
 Content-Type: application/json
 
 {
-    "username": "luiswest3",
+    "username": "luiswest5",
     "password": "secure1D#"
 }
 ###
 
-DELETE http://localhost:9090/api/auth/loggout/10
+DELETE http://localhost:9090/api/auth/loggout/13
 ###

@@ -10,6 +10,8 @@ $app->group('/api', function(RouteCollectorProxy $api) {
         $endpoint->patch('/loggout/{id}', Auth::class . ':loggout');
         $endpoint->delete('/logout/{id}', Auth::class . ':logout');
         $endpoint->patch('/logout/{id}', Auth::class . ':logout');
+        $endpoint->patch('/refresh/{id}', Auth::class . ':refresh');
+        $endpoint->post('/refresh/{id}', Auth::class . ':refresh');
     });
 
     $medicoRoutes = function(RouteCollectorProxy $endpoint) {
