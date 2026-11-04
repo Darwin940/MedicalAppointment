@@ -2,3 +2,4 @@ mysql/
 
 **/vendor/
 **/RestRequest/
+.idea/

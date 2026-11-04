@@ -28,6 +28,8 @@
     "@angular/build": "^22.2.1",
     "@angular/cli": "^22.2.1",
     "@angular/compiler-cli": "^22.2.1",
+    "@capacitor/cli": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
     "@tailwindcss/postcss": "^4.3.3",
     "jsdom": "^28.1.0",
     "postcss": "^8.5.28",
