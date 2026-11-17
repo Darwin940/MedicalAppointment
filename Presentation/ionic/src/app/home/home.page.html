@@ -1,0 +1,46 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Citas médicas</ion-title>
+    <ion-buttons slot="end">
+      <ion-button aria-label="Cerrar sesión" (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <section class="welcome-card">
+    <p class="eyebrow">Panel de atención</p>
+    <h1>Hola, {{ user()?.username }}</h1>
+    <p>Gestione la información de la clínica desde su dispositivo.</p>
+  </section>
+
+  <h2 class="section-title">Accesos rápidos</h2>
+  @if (canManageCatalogs) {
+    <div class="shortcut-grid">
+      <ion-card button routerLink="/tabs/medicos">
+        <ion-card-content>
+          <ion-icon name="medkit-outline"></ion-icon>
+          <h3>Médicos</h3>
+          <p>Consultar y administrar el catálogo</p>
+        </ion-card-content>
+      </ion-card>
+      <ion-card button routerLink="/tabs/pacientes">
+        <ion-card-content>
+          <ion-icon name="people-outline"></ion-icon>
+          <h3>Pacientes</h3>
+          <p>Consultar y administrar pacientes</p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  } @else {
+    <ion-card>
+      <ion-card-content>
+        <ion-icon name="person-circle-outline"></ion-icon>
+        <h3>Sesión de paciente</h3>
+        <p>Su sesión está activa. Para gestionar su perfil, contacte a la clínica.</p>
+      </ion-card-content>
+    </ion-card>
+  }
+</ion-content>

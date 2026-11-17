@@ -1,0 +1,59 @@
+.login-content {
+  --background: var(--ion-color-light);
+}
+
+.login-shell {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.brand-icon {
+  color: var(--ion-color-primary);
+  font-size: 58px;
+  margin-bottom: 20px;
+}
+
+.eyebrow {
+  color: var(--ion-color-primary);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+
+h1 {
+  color: var(--ion-color-dark);
+  font-size: 32px;
+  margin: 0;
+}
+
+.intro {
+  color: var(--ion-color-medium);
+  margin: 8px 0 30px;
+}
+
+.input-item {
+  --background: white;
+  --border-radius: 12px;
+  --inner-border-width: 0;
+  border: 1px solid var(--ion-color-light-shade);
+  border-radius: 12px;
+  margin: 14px 0;
+}
+
+.error-message {
+  font-size: 14px;
+  margin: 16px 4px;
+}
+
+.login-button {
+  margin-top: 24px;
+  min-height: 48px;
+}

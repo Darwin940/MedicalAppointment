@@ -63,7 +63,7 @@ export class AuthService {
   }
   public refreshSession() : any {
     if (this.isLoggedIn() && this.srvTokens.tokenTimeToExp() <= 20) {
-      return this.http.patch<IToken>(`${API_URL}/refresh/${this.userActual.id}`,
+      return this.http.patch<IToken>(`${API_URL}/refresh-session/${this.userActual.id}`,
         {tkRef: this.srvTokens.refreshToken})
         .pipe(
           tap((tokens) => {

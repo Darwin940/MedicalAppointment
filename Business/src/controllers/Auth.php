@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\controllers;
 
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Container\ContainerInterface;
@@ -13,18 +11,16 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Services\DataService;
 
-final class Auth
+final class Auth extends Tokens
 {
-    public function __construct(private ContainerInterface $container) {}
-
-    public function generateTokens(string $id, string $username, int $rol_id): array
+    public function __construct(ContainerInterface $container)
     {
-        $config = $this->container->get('config');
-        return Tokens::generateTokens($id, $username, $rol_id, $config);
+        parent::__construct($container);
     }
 
     public function login(Request $request, Response $response): Response
     {
+        $request->getBody()->rewind();
         $data = $request->getParsedBody();
         $data = is_array($data) ? $data : [];
         $username = trim((string) ($data['username'] ?? ''));
@@ -42,20 +38,15 @@ final class Auth
                 'username' => $username,
                 'password' => $password,
             ], JSON_THROW_ON_ERROR));
-            
+
             $credentials = json_decode((string) $upstream->getBody(), true);
 
             if ($upstream->getStatusCode() !== 200 || !is_array($credentials)) {
-                return $this->json($response, [
-                    'error' => 'Credenciales inválidas.',
-                ], 401);
+                return $this->json($response, ['error' => 'Credenciales inválidas.'], 401);
             }
 
-            $tokens = $this->generateTokens((string) $credentials['id'], (string) $credentials['username'], (int) $credentials['rol_id']);
-
-            $service->put('auth/tkref/' . $credentials['id'], json_encode([
-                'tkRef' => $tokens['tkRef'],
-            ], JSON_THROW_ON_ERROR));
+            $tokens = $this->generateTokens($credentials);
+            $this->saveRefreshToken((string) $credentials['id'], $tokens['tkRef']);
 
             return $this->json($response, $tokens, 200);
         } catch (ConnectException) {
@@ -68,20 +59,13 @@ final class Auth
     public function loggout(Request $request, Response $response, array $args): Response
     {
         try {
-            $service = $this->container->get(DataService::class);
-            $service->put('auth/tkref/' . $args['id'], json_encode([
-                'tkRef' => ''
-            ], JSON_THROW_ON_ERROR)); 
-
-            return $this->json($response, [
-                'message' => 'Sesión cerrada correctamente.',
-                'msj' => 'Sesión cerrada',
-            ], 200);
+            $this->saveRefreshToken((string) $args['id'], '');
+            return $this->json($response, ['message' => 'Sesión cerrada correctamente.'], 200);
         } catch (ConnectException) {
             return $this->json($response, ['error' => 'El servicio de datos no está disponible.'], 502);
         } catch (RequestException) {
             return $this->json($response, ['error' => 'No se pudo consultar el servicio de datos.'], 502);
-        }        
+        }
     }
 
     public function logout(Request $request, Response $response, array $args): Response
@@ -89,64 +73,37 @@ final class Auth
         return $this->loggout($request, $response, $args);
     }
 
-    public function refresh(Request $request, Response $response, array $args): Response
+    public function refreshSession(Request $request, Response $response, array $args): Response
     {
-        $body = json_decode((string) $request->getBody(), true);
-        $tkRef = is_array($body) ? (string) ($body['tkRef'] ?? '') : '';
-
-        $datos = $this->verificarToken((string) ($args['id'] ?? ''), $tkRef);
-        $status = (int) ($datos['status'] ?? 401);
-        $info = json_decode((string) ($datos['body'] ?? '{}'), true);
-
-        if ($status === 200 && is_array($info)) {
-            $rolId = (int) ($info['rol_id'] ?? $info['rol'] ?? 1);
-            $username = (string) ($info['username'] ?? '');
-            $tokens = $this->generarToken((string) $args['id'], $rolId, $username);
-            $this->modificarToken((string) $args['id'], $tokens['tkRef']);
-
-            return $this->json($response, $tokens, 200);
+        $body = $request->getParsedBody();
+        if (!is_array($body)) {
+            $request->getBody()->rewind();
+            $body = json_decode((string) $request->getBody(), true);
         }
 
-        return $this->json($response, is_array($info) ? $info : ['error' => 'No autorizado'], $status);
-    }
-
-    private function verificarToken(string $id, string $tkRef): array
-    {
-        if ($id === '' || $tkRef === '') {
-            return ['status' => 401, 'body' => json_encode(['error' => 'Token de refresco inválido'])];
+        if (!is_array($body) || !is_string($body['tkRef'] ?? null) || $body['tkRef'] === '') {
+            return $this->json($response, ['error' => 'El token de refresco es obligatorio.'], 422);
         }
 
         try {
-            $config = $this->container->get('config');
-            $decoded = JWT::decode($tkRef, new Key($config->key, 'HS256'));
+            $data = $this->verifyToken((string) $args['id'], $body['tkRef']);
 
-            if ((string) ($decoded->sub ?? '') !== (string) $id) {
-                return ['status' => 401, 'body' => json_encode(['error' => 'El token no corresponde al usuario'])];
+            if (!is_array($data) || empty($data)) {
+                return $this->json($response, ['error' => 'Token de refresco inválido.'], 401);
             }
 
-            return [
-                'status' => 200,
-                'body' => json_encode([
-                    'rol' => (int) ($decoded->rol_id ?? 1),
-                    'rol_id' => (int) ($decoded->rol_id ?? 1),
-                    'username' => (string) ($decoded->username ?? ''),
-                ]),
-            ];
+            $tokens = $this->generateTokens($data);
+            $this->saveRefreshToken((string) $data['id'], $tokens['tkRef']);
+
+            return $this->json($response, $tokens, 200);
         } catch (\Throwable) {
-            return ['status' => 401, 'body' => json_encode(['error' => 'Token de refresco expirado o inválido'])];
+            return $this->json($response, ['error' => 'Token de refresco inválido.'], 401);
         }
     }
 
-    private function generarToken(string $id, int $rol = 1, string $username = ''): array
+    public function refresh(Request $request, Response $response, array $args): Response
     {
-        $config = $this->container->get('config');
-        return Tokens::generateTokens($id, $username, $rol, $config);
-    }
-
-    private function modificarToken(string $cedula, string $tkRef): void
-    {
-        $service = $this->container->get(DataService::class);
-        $service->put('auth/tkref/' . $cedula, json_encode(['tkRef' => $tkRef], JSON_THROW_ON_ERROR));
+        return $this->refreshSession($request, $response, $args);
     }
 
     private function json(Response $response, array $payload, int $status): Response

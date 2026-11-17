@@ -45,7 +45,7 @@ export class MedicoService {
   }
 
   public filtrar(parametros: ParametrosMedico): void {
-    this.parametros.set(parametros);
+    this.parametros.set({ ...parametros });
   }
 
   public guardar(datos: any, id?: number) {

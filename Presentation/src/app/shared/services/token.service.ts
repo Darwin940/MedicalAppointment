@@ -1,1 +1,59 @@
-export { TokenService } from './token-service';
+import { Injectable } from '@angular/core';
+import { JwtHelperService } from '@auth0/angular-jwt';
+import { IToken } from '../models/interfaces';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class TokenService {
+  private readonly JWT_TOKEN = 'JWT_TOKEN';
+  private readonly REFRESH_TOKEN = 'REFRESH_TOKEN';
+
+  public setToken(token: string): void {
+    localStorage.setItem(this.JWT_TOKEN, token);
+  }
+
+  public setRefreshToken(token: string): void {
+    localStorage.setItem(this.REFRESH_TOKEN, token);
+  }
+
+  public setTokens(tokens: IToken): void {
+    this.setToken(tokens.token);
+    this.setRefreshToken(tokens.tkRef);
+  }
+
+  public get token(): string | null {
+    return localStorage.getItem(this.JWT_TOKEN);
+  }
+
+  public get refreshToken(): string | null {
+    return localStorage.getItem(this.REFRESH_TOKEN);
+  }
+
+  public removeTokens(): void {
+    localStorage.removeItem(this.JWT_TOKEN);
+    localStorage.removeItem(this.REFRESH_TOKEN);
+  }
+
+  public eliminarTokens(): void {
+    this.removeTokens();
+  }
+
+  public decodeToken(): any {
+    const helper = new JwtHelperService();
+    return helper.decodeToken(this.token ?? '');
+  }
+
+  public jwtTokenExp(): boolean | Promise<boolean> {
+    const helper = new JwtHelperService();
+    return helper.isTokenExpired(this.token ?? '');
+  }
+
+  public tokenTimeToExp(): number {
+    const decoded = this.decodeToken();
+    if (!decoded || !decoded.exp) {
+      return 0;
+    }
+    return decoded.exp - Date.now() / 1000;
+  }
+}

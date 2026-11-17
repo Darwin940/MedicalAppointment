@@ -5,19 +5,44 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MedicoService } from '../../shared/services/medico-service';
 import { MedicoCreateInput, MedicoModel } from '../../shared/models/medico-model';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { FrmMedico } from '../forms/frm-medico/frm-medico';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { DialogoGeneral } from '../forms/dialogo-general/dialogo-general';
+import { PrintService } from '../../shared/services/print.service';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { form, FormField } from '@angular/forms/signals';
+
+type FilterForm = {
+  nombre: string;
+  especialidad: string;
+  licencia: string;
+};
 
 @Component({
-  imports: [MatCardModule, MatButtonModule, MatIconModule, MatTableModule, MatDialogModule],
+  imports: [
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTableModule,
+    MatDialogModule,
+    MatExpansionModule,
+    MatFormFieldModule,
+    MatInputModule,
+    FormField
+  ],
   selector: 'app-medico-component',
   styleUrl: './medico-component.css',
   templateUrl: './medico-component.html',
 })
 export class MedicoComponent implements OnInit {
   buscarID = signal<number | null>(null);
-
+  filtro: { nombre: string; cedula: string; especialidad: string } = {
+    nombre: '',
+    cedula: '',
+    especialidad: ''
+  };
   displayedColumns: string[] = [
     'id',
     'nombre_completo',
@@ -26,14 +51,23 @@ export class MedicoComponent implements OnInit {
     'telefono',
     'botonera'
   ];
-
   dataSource = signal<MedicoModel[]>([]);
-
   srvMedico = inject(MedicoService);
+  private readonly srvPrint = inject(PrintService);
   dialog = inject(MatDialog);
+  panelFilterState = signal(false);
 
-  filtro : { nombre: string; cedula: string; especialidad: string } = 
-    { nombre: '', cedula: '', especialidad: '' };
+  objFilter = signal<FilterForm>({
+    nombre: '',
+    especialidad: '',
+    licencia: ''
+  });
+
+  frmFilter = form(this.objFilter, (s) => {
+    s.nombre;
+    s.especialidad;
+    s.licencia;
+  });
 
   constructor() {
     effect(() => {
@@ -55,22 +89,21 @@ export class MedicoComponent implements OnInit {
         const medico = respuesta.value()?.data;
         this.mostrarDialogo('Editar Médico', medico!, false, id);
       } else if (respuesta.status() === 'error') {
-        console.error(`No se pudo buscar el médico con ID ${id}:`, respuesta.error());
-        alert('No se pudo cargar el médico');
+        this.alertar('error', 'No se pudo cargar el médico', ' Aceptar ');
       }
     });
   }
 
-  private resetFilter() : void {
+  private resetearFiltro(): void {
     this.filtro = { nombre: '', cedula: '', especialidad: '' };
-    this.filterMedicos();
+    this.filtrarMedicos();
   }
 
-  private filterMedicos() {
+  private filtrarMedicos(): void {
     this.srvMedico.filtrar(this.filtro);
   }
 
-  private alerta(icono: string, mensaje: string, textoAceptar: string) {
+  private alertar(icono: string, mensaje: string, textoAceptar: string): void {
     this.dialog.open(DialogoGeneral, {
       width: '30vw',
       maxWidth: '20rem',
@@ -82,8 +115,8 @@ export class MedicoComponent implements OnInit {
     });
   }
 
-  public mostrarDialogo(titulo: string, datos?: MedicoModel, info?: boolean, id?: number) {
-    const dialogRef = this.dialog.open(FrmMedico, {
+  public mostrarDialogo(titulo: string, datos?: MedicoModel, info?: boolean, id?: number): void {
+    const dialogRef = this.dialog.open<FrmMedico, unknown, MedicoCreateInput | false | undefined>(FrmMedico, {
       width: '50vw',
       maxWidth: '35rem',
       data: {
@@ -93,50 +126,69 @@ export class MedicoComponent implements OnInit {
       },
       disableClose: true
     });
-    dialogRef.afterClosed().subscribe((objMedico) => {
-      if (objMedico === undefined || objMedico === false) {
+    dialogRef.afterClosed().subscribe((medicoCreado) => {
+      if (medicoCreado === undefined || medicoCreado === false) {
         return;
       }
 
-      this.srvMedico.guardar(objMedico, id).subscribe({
+      this.srvMedico.guardar(medicoCreado, id).subscribe({
         complete: () => {
-          this.resetFilter();
-          this.alerta('check', id === undefined ? 'Datos creados' : 'Datos actualizados', ' Cerrar ');
+          this.resetearFiltro();
+          this.alertar('check', id === undefined ? 'Datos creados' : 'Datos actualizados', ' Aceptar ');
         },
         error: () => {
-          this.alerta('error', 'No se pudo guardar el médico', ' Cerrar ');
-        }
+          this.alertar('error', 'No se pudo guardar el médico', ' Aceptar ');
+        },
       });
     });
   }
 
   onCreate(): void {
     this.buscarID.set(null);
-    this.mostrarDialogo('Nuevo Cliente');
+    this.mostrarDialogo('Nuevo Médico');
   }
 
-  onEdit(idMedico: number): void {
-    this.buscarID.set(idMedico);
-    this.srvMedico.buscarPorId(idMedico);
+  onEdit(id: number): void {
+    this.buscarID.set(id);
+    this.srvMedico.buscarPorId(id);
   }
 
-  onDelete(idMedico: number): void {
-    console.log("Eliminar medico ", idMedico);
+  onInfo(medico: number): void {
   }
 
-  onInfo(idMedico: number): void {
-    console.log("Ver información de medico ", idMedico);
+  onDelete(medico: number): void {
   }
 
-  onResetPassword(idMedico: number): void {
-    console.log("Resetear contraseña de ", idMedico);
+  onResetPassw(medico: number): void {
   }
 
-  onResetPassw(idMedico: number): void {
-    this.onResetPassword(idMedico);
+  onPrint(): void {
+    const columnas = ['Id', 'Nombre', 'Especialidad', 'Licencia', 'Teléfono'];
+    const filas = this.dataSource().map((fila) => [
+      fila.id?.toString() ?? '',
+      fila.nombre_completo,
+      fila.especialidad_nombre ?? '',
+      fila.licencia ?? '',
+      fila.telefono ?? ''
+    ]);
+    this.srvPrint.print(columnas, filas, 'Catálogo de médicos', true);
+  }
+
+  onFilterClose(): void {
+  }
+
+  toggleFilterPanel(): void {
+    this.panelFilterState.update((isOpen) => !isOpen);
+  }
+
+  onFilterChange(): void {
+    this.filtro.nombre = this.objFilter().nombre;
+    this.filtro.especialidad = this.objFilter().especialidad;
+    this.filtro.cedula = this.objFilter().licencia;
+    this.filtrarMedicos();
   }
 
   ngOnInit(): void {
-    this.resetFilter();
+    this.resetearFiltro();
   }
 }

@@ -1,0 +1,19 @@
+<ion-tabs>
+  <ion-router-outlet></ion-router-outlet>
+  <ion-tab-bar slot="bottom">
+    <ion-tab-button tab="home" [routerLink]="['/tabs/home']">
+      <ion-icon name="home-outline"></ion-icon>
+      <ion-label>Inicio</ion-label>
+    </ion-tab-button>
+    @if (canManageCatalogs) {
+      <ion-tab-button tab="medicos" [routerLink]="['/tabs/medicos']">
+        <ion-icon name="medkit-outline"></ion-icon>
+        <ion-label>Médicos</ion-label>
+      </ion-tab-button>
+      <ion-tab-button tab="pacientes" [routerLink]="['/tabs/pacientes']">
+        <ion-icon name="people-outline"></ion-icon>
+        <ion-label>Pacientes</ion-label>
+      </ion-tab-button>
+    }
+  </ion-tab-bar>
+</ion-tabs>

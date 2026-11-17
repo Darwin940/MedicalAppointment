@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Slim\Factory\AppFactory;
 use DI\Container;
 use JimTools\JwtAuth\Decoder\FirebaseDecoder;
@@ -29,22 +31,24 @@ require_once "config.php";
 require_once "routes.php";
 
 $app->add(new JwtAuthentication(
-	new Options(isSecure: false),
-	new FirebaseDecoder(new Secret($_ENV['KEY'], 'HS256')),
-	[new RequestPathRule(
-        ['/'], 
-        ['/api/auth', '/api/medicos', '/api/medico'])]
+    new Options(isSecure: false),
+    new FirebaseDecoder(new Secret($_ENV['KEY'], 'HS256')),
+    [new RequestPathRule(
+        ['/'],
+        ['/api/auth']
+    )]
 ));
 
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
-$errorMiddleware->setErrorHandler(AuthorizationException::class,
-	function ($request, AuthorizationException $exception, bool $displayErrorDetails) use ($app) {
-		$response = $app->getResponseFactory()->createResponse(401);
-		$response->getBody()->write(json_encode([
-			'error' => 'Token inválido o ausente.',
-		], JSON_UNESCAPED_UNICODE));
-		return $response->withHeader('Content-Type', 'application/json; charset=utf-8');
-	}
+$errorMiddleware->setErrorHandler(
+    AuthorizationException::class,
+    function ($request, AuthorizationException $exception, bool $displayErrorDetails) use ($app) {
+        $response = $app->getResponseFactory()->createResponse(401);
+        $response->getBody()->write(json_encode([
+            'error' => 'Token inválido o ausente.',
+        ], JSON_UNESCAPED_UNICODE));
+        return $response->withHeader('Content-Type', 'application/json; charset=utf-8');
+    }
 );
 $errorMiddleware->setErrorHandler(
     \Slim\Exception\HttpNotFoundException::class,
@@ -68,29 +72,45 @@ $errorMiddleware->setErrorHandler(
     }
 );
 
-$app->add(function (ServerRequestInterface $request, RequestHandlerInterface $handler) use ($app): ResponseInterface {
-	$origin = $request->getHeaderLine('Origin');
-	$allowedOrigin = $_ENV['CORS_ALLOWED_ORIGIN'] ?? 'http://localhost:4200';
-
-	if ($request->getMethod() === 'OPTIONS' && $origin === $allowedOrigin) {
-		$response = $app->getResponseFactory()->createResponse(204);
-	} else {
-		$response = $handler->handle($request);
-	}
-
-	if ($origin !== $allowedOrigin) {
-		return $response;
-	}
-
-	return $response
-		->withHeader('Access-Control-Allow-Origin', $allowedOrigin)
-		->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
-		->withHeader('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, Origin, X-Requested-With')
-		->withHeader('Vary', 'Origin');
+$app->options('/{routes:.+}', function (ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface {
+    return $response->withStatus(204);
 });
 
-$app->options('/{routes:.+}', function (ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface {
-	return $response->withStatus(204);
+$app->add(function (ServerRequestInterface $request, RequestHandlerInterface $handler) use ($app): ResponseInterface {
+    $allowedOrigins = [
+        'http://localhost:4200',
+        'https://localhost',
+        'http://localhost',
+        'capacitor://localhost'
+    ];
+
+    $configuredOrigins = $_ENV['CORS_ALLOWED_ORIGINS'] ?? $_ENV['CORS_ALLOWED_ORIGIN'] ?? '';
+    if ($configuredOrigins !== '') {
+        $allowedOrigins = array_unique(array_merge(
+            $allowedOrigins,
+            array_filter(array_map('trim', explode(',', $configuredOrigins)))
+        ));
+    }
+
+    $origin = $request->getHeaderLine('Origin');
+    $isAllowedOrigin = in_array($origin, $allowedOrigins, true);
+
+    if ($request->getMethod() === 'OPTIONS') {
+        $response = $app->getResponseFactory()->createResponse(204);
+    } else {
+        $response = $handler->handle($request);
+    }
+
+    if (!$isAllowedOrigin) {
+        return $response;
+    }
+
+    return $response
+        ->withHeader('Access-Control-Allow-Origin', $origin)
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
+        ->withHeader('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, Origin, X-Requested-With')
+        ->withHeader('Access-Control-Max-Age', '86400')
+        ->withHeader('Vary', 'Origin');
 });
 
 $app->run();

@@ -21,9 +21,9 @@
     <mat-sidenav-container class="container">
         <mat-sidenav #sidenav mode="side" class="sidenav" [opened]="authService.isLoggedIn()">
             <mat-nav-list>
-                <mat-list-item class="bg-amber-500">Luis West</mat-list-item>
+                <mat-list-item class="bg-amber-300! rounded-sm!">{{authService.userActualS().nombre || 'Usuario'}}</mat-list-item>
                 <hr>
-                @for(item of menuItems; track item.label) {
+                @for(item of menuItems(); track item.label) {
                     <mat-list-item>
                         <a href="" [routerLink]="item.route">
                             <mat-icon>{{item.icon}}</mat-icon>
@@ -39,7 +39,7 @@
     </mat-sidenav-container>
     <mat-toolbar class="footer">
         <span class="font-bold! text-[0.65rem]!">
-            @2026 Sistema de citas médicas. Todos los derechos reservados
+            @2026 Citas Médicas. Todos los derechos reservados.
         </span>
     </mat-toolbar>
 </section>

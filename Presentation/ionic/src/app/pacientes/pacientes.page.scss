@@ -1,0 +1,41 @@
+.cedula-filter,
+ion-modal ion-input {
+  --background: var(--ion-color-light);
+  --border-radius: 10px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  padding-inline: 10px !important;
+}
+
+.record-card {
+  border-radius: 16px;
+  margin: 12px 0;
+}
+
+.record-card p {
+  margin: 6px 0;
+}
+
+.record-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.state-message {
+  align-items: center;
+  color: var(--ion-color-medium);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 28px 12px;
+  text-align: center;
+}
+
+.state-message ion-icon {
+  font-size: 34px;
+}
+
+.save-button {
+  margin-top: 24px;
+}

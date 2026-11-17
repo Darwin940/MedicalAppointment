@@ -1,6 +1,6 @@
 @host = http://localhost:9090/api
 @uri = {{host}}/medicos
-@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJjaXRhcy1tZWRpY2FzLWJ1c2luZXNzIiwiaWF0IjoxNzkzMjg5OTIzLCJleHAiOjE3OTMyOTM1MjMsInN1YiI6IjEwIiwidXNlcm5hbWUiOiJsdWlzd2VzdDMiLCJyb2xfaWQiOjJ9.VRM1AKufv36tmPHftr5rT5gxITIAoQZ06-TYOaTnh6I
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJjaXRhcy1tZWRpY2FzLWJ1c2luZXNzIiwiaWF0IjoxNzk0MTEyNzA3LCJleHAiOjE3OTQxMTYzMDcsInN1YiI6MTMsInVzZXJuYW1lIjoibHVpc3dlc3Q1Iiwicm9sX2lkIjoyfQ.suxr6tyjMtQjyoynnqqYbH_Gc7asyFUJkqda6y3F9ZI
 
 GET {{uri}}
 Authorization: Bearer {{token}}
@@ -9,38 +9,48 @@ Authorization: Bearer {{token}}
 POST {{uri}}
 Content-Type: application/json
 
- {
-    "especialidad_id": 2,
-    "nombre_completo": "Luis Armando West Grant",
-    "licencia": "LIC-1254515",
-    "telefono": "8888-7771",
-    "username": "luiswest5",
-    "password": "secure1D#"
-  }
+{
+  "especialidad_id": 2,
+  "nombre_completo": "Luis Armando West Grant",
+  "licencia": "LIC-1254515",
+  "telefono": "8888-7771",
+  "username": "luiswest5",
+  "password": "secure1D#"
+}
 ###
 
 PUT {{uri}}/3
 Content-Type: application/json
 
- {
-    "nombre_completo": "Armando West Grant",
-    "telefono": "8686-5555"
-  }
+{
+  "nombre_completo": "Armando West Grant",
+  "telefono": "8686-5555"
+}
 ###
+
 DELETE {{uri}}/5
 ###
 
-GET {{uri}}/filter/0/10?nombre=&cedula=&especialidad=
+GET {{uri}}/filter/0/10?nombre=west&cedula=&especialidad=
+Authorization: Bearer {{token}}
 ###
 
 POST http://localhost:9090/api/auth/login
 Content-Type: application/json
 
 {
-    "username": "luiswest5",
-    "password": "secure1D#"
+  "username": "luiswest5",
+  "password": "secure1D#"
 }
 ###
 
 DELETE http://localhost:9090/api/auth/loggout/13
+###
+
+POST http://localhost:9090/api/auth/refresh-session/13
+Content-Type: application/json
+
+{
+  "tkRef": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJjaXRhcy1tZWRpY2FzLWJ1c2luZXNzIiwiaWF0IjoxNzkzOTY1OTkyLCJzdWIiOjEzfQ.xINx00twOGb4XYAsUEoStZq4ZAVuhv8ma4_Kt1bIdO4"
+}
 ###

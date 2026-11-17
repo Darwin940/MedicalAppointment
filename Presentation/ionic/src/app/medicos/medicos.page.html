@@ -1,0 +1,142 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Médicos</ion-title>
+    <ion-buttons slot="end">
+      <ion-button aria-label="Agregar médico" (click)="openCreate()">
+        <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar
+      placeholder="Buscar por nombre"
+      [(ngModel)]="filters.nombre"
+      (ionChange)="loadDoctors()"
+      debounce="350">
+    </ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-refresher slot="fixed" (ionRefresh)="loadDoctors(); $event.target.complete()">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="filter-row">
+    <ion-input
+      label="Especialidad"
+      labelPlacement="stacked"
+      [(ngModel)]="filters.especialidad"
+      (ionChange)="loadDoctors()"
+      debounce="350">
+    </ion-input>
+    <ion-input
+      label="Licencia"
+      labelPlacement="stacked"
+      [(ngModel)]="filters.licencia"
+      (ionChange)="loadDoctors()"
+      debounce="350">
+    </ion-input>
+  </div>
+
+  @if (loading) {
+    <div class="state-message">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando médicos...</p>
+    </div>
+  } @else if (doctors.length === 0) {
+    <div class="state-message">
+      <ion-icon name="search-outline"></ion-icon>
+      <p>No hay médicos que coincidan con la búsqueda.</p>
+    </div>
+  }
+
+  @for (doctor of doctors; track doctor.id) {
+    <ion-card class="record-card">
+      <ion-card-header>
+        <ion-card-title>{{ doctor.nombre_completo }}</ion-card-title>
+        <ion-card-subtitle>{{ doctor.especialidad_nombre || ('Especialidad ' + doctor.especialidad_id) }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p><strong>Licencia:</strong> {{ doctor.licencia }}</p>
+        <p><strong>Teléfono:</strong> {{ doctor.telefono || 'No indicado' }}</p>
+        <div class="record-actions">
+          <ion-button fill="clear" (click)="openEdit(doctor)">
+            <ion-icon slot="start" name="create-outline"></ion-icon>
+            Editar
+          </ion-button>
+          <ion-button fill="clear" color="danger" (click)="delete(doctor)">
+            <ion-icon slot="start" name="trash-outline"></ion-icon>
+            Eliminar
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  }
+
+  <ion-modal [isOpen]="modalOpen" (didDismiss)="closeForm()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>{{ editingId === null ? 'Nuevo médico' : 'Editar médico' }}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeForm()">Cerrar</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <form (ngSubmit)="save()">
+          <ion-input
+            name="nombre"
+            label="Nombre completo"
+            labelPlacement="stacked"
+            [(ngModel)]="draft.nombre_completo"
+            required>
+          </ion-input>
+          <ion-input
+            name="especialidad"
+            type="number"
+            label="ID de especialidad"
+            labelPlacement="stacked"
+            [(ngModel)]="draft.especialidad_id"
+            required>
+          </ion-input>
+          <ion-input
+            name="licencia"
+            label="Licencia"
+            labelPlacement="stacked"
+            [(ngModel)]="draft.licencia"
+            required>
+          </ion-input>
+          <ion-input
+            name="telefono"
+            type="tel"
+            label="Teléfono"
+            labelPlacement="stacked"
+            [(ngModel)]="draft.telefono">
+          </ion-input>
+          @if (editingId === null) {
+            <ion-input
+              name="username"
+              label="Usuario"
+              labelPlacement="stacked"
+              [(ngModel)]="draft.username"
+              required>
+            </ion-input>
+            <ion-input
+              name="password"
+              type="password"
+              label="Contraseña (mínimo 8 caracteres)"
+              labelPlacement="stacked"
+              [(ngModel)]="draft.password"
+              required>
+            </ion-input>
+          }
+          <ion-button class="save-button" expand="block" type="submit">
+            Guardar
+          </ion-button>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

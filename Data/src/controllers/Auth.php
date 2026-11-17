@@ -50,6 +50,30 @@ final class Auth
         return $this->json($response, ['msj' => 'Token refresco modificado'], 200);
     }
 
+    public function verifyToken(Request $request, Response $response, array $args): Response
+    {
+        $body = json_decode((string) $request->getBody(), true);
+        $tkRef = is_array($body) ? ($body['tkRef'] ?? null) : null;
+
+        $this->container->get('eloquent');
+
+        $user = null;
+        if (is_string($tkRef) && $tkRef !== '') {
+            $user = User::query()
+                ->where('id', $args['id'])
+                ->where('tkRef', $tkRef)
+                ->first(['id', 'username', 'rol_id']);
+        }
+
+        $response->getBody()->write(json_encode(
+            $user?->toArray() ?? [],
+            JSON_THROW_ON_ERROR
+        ));
+        return $response
+            ->withHeader('Content-Type', 'application/json; charset=utf-8')
+            ->withStatus($user !== null ? 200 : 401);
+    }
+
     private function json(Response $response, array $payload, int $status): Response
     {
         $response->getBody()->write(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));

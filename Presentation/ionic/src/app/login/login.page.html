@@ -1,0 +1,45 @@
+<ion-content class="login-content">
+  <main class="login-shell">
+    <ion-icon class="brand-icon" name="medkit-outline" aria-hidden="true"></ion-icon>
+    <p class="eyebrow">Citas médicas</p>
+    <h1>Bienvenido</h1>
+    <p class="intro">Inicie sesión para continuar</p>
+
+    <form (ngSubmit)="login()">
+      <ion-item class="input-item">
+        <ion-input
+          name="username"
+          label="Usuario"
+          labelPlacement="floating"
+          autocomplete="username"
+          [(ngModel)]="username"
+          required>
+        </ion-input>
+      </ion-item>
+      <ion-item class="input-item">
+        <ion-input
+          name="password"
+          label="Contraseña"
+          labelPlacement="floating"
+          type="password"
+          autocomplete="current-password"
+          [(ngModel)]="password"
+          required>
+        </ion-input>
+      </ion-item>
+
+      @if (error) {
+        <ion-text color="danger">
+          <p class="error-message">{{ error }}</p>
+        </ion-text>
+      }
+      <ion-button class="login-button" expand="block" type="submit" [disabled]="loading">
+        @if (loading) {
+          <ion-spinner name="crescent"></ion-spinner>
+        } @else {
+          <span>Iniciar sesión</span>
+        }
+      </ion-button>
+    </form>
+  </main>
+</ion-content>

@@ -1,20 +1,25 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\controllers;
 
 use Slim\Routing\RouteCollectorProxy;
 
-$app->group('/api', function(RouteCollectorProxy $api) {
-    $api->group('/auth', function(RouteCollectorProxy $endpoint) {
+$app->group('/api', function (RouteCollectorProxy $api) {
+    $api->group('/auth', function (RouteCollectorProxy $endpoint) {
         $endpoint->post('/login', Auth::class . ':login');
         $endpoint->delete('/loggout/{id}', Auth::class . ':loggout');
         $endpoint->patch('/loggout/{id}', Auth::class . ':loggout');
         $endpoint->delete('/logout/{id}', Auth::class . ':logout');
         $endpoint->patch('/logout/{id}', Auth::class . ':logout');
-        $endpoint->patch('/refresh/{id}', Auth::class . ':refresh');
+        $endpoint->post('/refresh-session/{id}', Auth::class . ':refreshSession');
+        $endpoint->patch('/refresh-session/{id}', Auth::class . ':refreshSession');
         $endpoint->post('/refresh/{id}', Auth::class . ':refresh');
+        $endpoint->patch('/refresh/{id}', Auth::class . ':refresh');
     });
 
-    $medicoRoutes = function(RouteCollectorProxy $endpoint) {
+    $medicoRoutes = function (RouteCollectorProxy $endpoint) {
         $endpoint->get('[/{id}]', Medico::class . ':read');
         $endpoint->get('/filter/{offset}/{limit}', Medico::class . ':filter');
         $endpoint->post('', Medico::class . ':create');
@@ -24,7 +29,7 @@ $app->group('/api', function(RouteCollectorProxy $api) {
     $api->group('/medicos', $medicoRoutes);
     $api->group('/medico', $medicoRoutes);
 
-    $pacienteRoutes = function(RouteCollectorProxy $endpoint) {
+    $pacienteRoutes = function (RouteCollectorProxy $endpoint) {
         $endpoint->get('[/{id}]', Paciente::class . ':read');
         $endpoint->get('/filter/{offset}/{limit}', Paciente::class . ':filter');
         $endpoint->post('', Paciente::class . ':create');
@@ -34,7 +39,7 @@ $app->group('/api', function(RouteCollectorProxy $api) {
     $api->group('/pacientes', $pacienteRoutes);
     $api->group('/paciente', $pacienteRoutes);
 
-    $citasRoutes = function(RouteCollectorProxy $endpoint) {
+    $citasRoutes = function (RouteCollectorProxy $endpoint) {
         $endpoint->get('[/{id}]', Citas::class . ':read');
         $endpoint->get('/paciente/{id}', Citas::class . ':readPaciente');
         $endpoint->get('/medico/{id}', Citas::class . ':readMedico');
