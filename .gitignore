@@ -3,3 +3,4 @@ mysql/
 **/vendor/
 **/RestRequest/
 .idea/
+docs/
