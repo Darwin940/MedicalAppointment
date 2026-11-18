@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.darwincortes.medicalappointments',
-  appName: 'CitasMedicas',
+  appName: 'Medical Appointments',
   webDir: 'dist/Presentation/browser',
   server: {
     cleartext: true,

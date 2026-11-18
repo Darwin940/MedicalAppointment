@@ -1,7 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { MedicoModel } from '../models/medico-model';
-import { environment } from '../../../environments/environment.development';
+import { environment } from '../../../environments/environment';
 
 type ParametrosMedico = Record<string, string | number | boolean>;
 interface RespuestaMedicos {

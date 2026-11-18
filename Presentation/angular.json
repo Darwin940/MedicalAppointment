@@ -24,7 +24,15 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/material-theme.scss", "src/styles.css"]
+            "styles": ["src/material-theme.scss", "src/styles.css"],
+            "allowedCommonJsDependencies": [
+              "core-js",
+              "raf",
+              "rgbcolor",
+              "html2canvas",
+              "canvg",
+              "dompurify"
+            ]
           },
           "configurations": {
             "production": {
@@ -50,6 +58,15 @@
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.development.ts"
+                }
+              ]
+            },
+            "android": {
+              "outputHashing": "all",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.android.ts"
                 }
               ]
             }
