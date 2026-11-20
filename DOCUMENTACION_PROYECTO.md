@@ -322,3 +322,61 @@ sequenceDiagram
    - `405 Method Not Allowed`: Método HTTP incorrecto para una ruta válida (ejemplo: hacer un `DELETE` sobre una ruta que solo acepta `POST`).
    - `422 Unprocessable Entity`: Error de validación en los campos enviados (ejemplo: contraseña débil, formato de teléfono incorrecto).
    - `502 Bad Gateway`: La capa de negocio intentó comunicarse con la capa de datos pero esta no estaba disponible.
+
+---
+
+## 10. Integración Móvil con Capacitor / Android y Entorno de Desarrollo
+
+### 10.1 Configuración de Compilación para Android
+El proyecto integra **Capacitor** para compilar la aplicación Angular como una app nativa de Android:
+- **Scripts en `package.json`**:
+  - `pnpm run build:android`: Compila Angular con la configuración de Android (`ng build --configuration android`) y sincroniza los assets con la carpeta nativa (`cap sync android`).
+  - `pnpm run android`: Compila y abre el proyecto en Android Studio (`cap open android`).
+- **Reemplazo de Entorno (`angular.json`)**:
+  - La configuración `"android"` reemplaza `environment.ts` por `environment.android.ts`.
+  - En Android, `10.0.2.2` es el alias que permite al emulador acceder al `localhost` de la máquina anfitriona (puerto `9090` del servicio de Business):
+    ```typescript
+    export const environment = {
+      servidor: 'http://10.0.2.2:9090/api'
+    };
+    ```
+
+### 10.2 CORS en la Capa de Negocio para Aplicaciones Móviles
+La aplicación WebView de Capacitor se ejecuta bajo orígenes específicos (`http://localhost`, `https://localhost` o `capacitor://localhost`). El middleware de CORS en `Business/src/app/App.php` admite estos orígenes por defecto y permite personalizarlos con la variable de entorno `CORS_ALLOWED_ORIGINS`:
+```php
+$allowedOrigins = array_map('trim', explode(',',
+    $_ENV['CORS_ALLOWED_ORIGINS']
+        ?? $_ENV['CORS_ALLOWED_ORIGIN']
+        ?? 'http://localhost:4200,http://localhost:4300,http://localhost,https://localhost,capacitor://localhost'
+));
+```
+
+### 10.3 Control de Versiones con Git y Gradle
+La carpeta de caché de Gradle (`android/.gradle`) no debe incluirse en el repositorio para evitar archivos binarios pesados e inconsistencias entre plataformas:
+```bash
+git rm -r --cached android/.gradle
+```
+Se encuentra debidamente ignorada en `.gitignore`.
+
+### 10.4 Tips de Desarrollo y Depuración
+- **Acortar el Prompt en PowerShell**:
+  Para evitar que la ruta completa de Windows ocupe demasiado espacio en la consola durante el desarrollo:
+  ```powershell
+  function prompt { "$(Split-Path -Leaf -Path (Get-Location))> " }
+  ```
+- **Depuración de la WebView de Capacitor en Android**:
+  Abra Google Chrome en su computadora y navegue a:
+  ```text
+  chrome://inspect/#devices
+  ```
+  Esto permite inspeccionar la consola, elementos HTML, almacenamiento local y peticiones de red del emulador o dispositivo físico directamente desde las Chrome DevTools.
+
+### 10.5 Módulo de Médicos (Frontend)
+- **Filtros reactivos basados en Signals**: Usa `objFilter` y `frmFilter` (`@angular/forms/signals`) conectados a `panelFilterState` en un `mat-expansion-panel`.
+- **Botonera de acciones**:
+  - **Crear**: Abre diálogo modal para ingresar nuevo médico y credenciales.
+  - **Detalle (`onInfo`)**: Visualización de los datos del médico en modo solo lectura (`info: true`).
+  - **Editar (`onEdit`)**: Carga el médico por ID y permite actualizar especialidad, nombre, licencia y teléfono.
+  - **Eliminar (`onDelete`)**: Solicita confirmación mediante `DialogoGeneral` y llama al endpoint `DELETE /api/medicos/{id}`.
+  - **Restablecer Contraseña (`onResetPassw`)**: Confirmación para emisión de reset de credenciales.
+  - **Imprimir (`onPrint`)**: Genera el catálogo completo en formato PDF con `jsPDF` y `jspdf-autotable` mediante `PrintService`.

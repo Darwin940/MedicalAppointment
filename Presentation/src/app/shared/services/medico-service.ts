@@ -59,4 +59,12 @@ export class MedicoService {
       return this.http.post<any>(`${_SERVIDOR}/medicos`, datos);
     }
   }
+
+  public eliminar(id: number) {
+    return this.http.delete<any>(`${_SERVIDOR}/medicos/${id}`);
+  }
+
+  public obtenerPorId(id: number) {
+    return this.http.get<RespuestaMedico>(`${_SERVIDOR}/medicos/${id}`);
+  }
 }

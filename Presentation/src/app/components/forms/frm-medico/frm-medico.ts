@@ -44,6 +44,7 @@ export class FrmMedico implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly data = inject<MedicoDialogData>(MAT_DIALOG_DATA);
   readonly isEditing = this.data.data !== undefined;
+  readonly isInfo = this.data.info === true;
 
   especialidades = signal<{ id: number; nombre: string }[]>([
     { id: 1, nombre: 'Cardiología' },

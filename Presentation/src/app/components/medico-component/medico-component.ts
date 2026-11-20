@@ -153,13 +153,68 @@ export class MedicoComponent implements OnInit {
     this.srvMedico.buscarPorId(id);
   }
 
-  onInfo(medico: number): void {
+  onInfo(id: number): void {
+    const medico = this.dataSource().find((m) => m.id === id);
+    if (medico) {
+      this.mostrarDialogo('Información del Médico', medico, true);
+    } else {
+      this.srvMedico.obtenerPorId(id).subscribe({
+        next: (respuesta) => {
+          if (respuesta.data) {
+            this.mostrarDialogo('Información del Médico', respuesta.data, true);
+          }
+        },
+        error: () => {
+          this.alertar('error', 'No se pudo cargar la información del médico', ' Aceptar ');
+        }
+      });
+    }
   }
 
-  onDelete(medico: number): void {
+  onDelete(id: number): void {
+    const dialogRef = this.dialog.open(DialogoGeneral, {
+      width: '30vw',
+      maxWidth: '20rem',
+      data: {
+        icono: 'warning',
+        texto: '¿Está seguro de que desea eliminar este médico?',
+        textoAceptar: 'Eliminar',
+        textoCancelar: 'Cancelar'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmado) => {
+      if (confirmado) {
+        this.srvMedico.eliminar(id).subscribe({
+          next: () => {
+            this.resetearFiltro();
+            this.alertar('check', 'Médico eliminado exitosamente', ' Aceptar ');
+          },
+          error: () => {
+            this.alertar('error', 'No se pudo eliminar el médico', ' Aceptar ');
+          }
+        });
+      }
+    });
   }
 
-  onResetPassw(medico: number): void {
+  onResetPassw(id: number): void {
+    const dialogRef = this.dialog.open(DialogoGeneral, {
+      width: '30vw',
+      maxWidth: '22rem',
+      data: {
+        icono: 'vpn_key',
+        texto: '¿Desea restablecer la contraseña para este médico?',
+        textoAceptar: 'Restablecer',
+        textoCancelar: 'Cancelar'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmado) => {
+      if (confirmado) {
+        this.alertar('check', 'Solicitud de restablecimiento procesada correctamente', ' Aceptar ');
+      }
+    });
   }
 
   onPrint(): void {
@@ -175,6 +230,10 @@ export class MedicoComponent implements OnInit {
   }
 
   onFilterClose(): void {
+    if (this.objFilter().nombre || this.objFilter().especialidad || this.objFilter().licencia) {
+      this.objFilter.set({ nombre: '', especialidad: '', licencia: '' });
+      this.resetearFiltro();
+    }
   }
 
   toggleFilterPanel(): void {

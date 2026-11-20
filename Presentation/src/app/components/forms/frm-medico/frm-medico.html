@@ -3,6 +3,7 @@
 
 <mat-dialog-content>
   <form id="frmMedico" [formRoot]="frmMedico" class="grid gap-4 py-2">
+    <fieldset [disabled]="isInfo" class="contents">
     <mat-form-field appearance="outline" class="mb-0">
       <mat-label>Especialidad</mat-label>
       <mat-select [formField]="frmMedico.especialidad_id">
@@ -46,7 +47,7 @@
         }
     </mat-form-field>
 
-    @if (!isEditing) {
+    @if (!isEditing && !isInfo) {
       <mat-form-field appearance="outline">
         <mat-label>Usuario</mat-label>
         <input matInput placeholder="Nombre de usuario" [formField]="frmMedico.username!" />
@@ -67,11 +68,14 @@
           }
       </mat-form-field>
     }
+    </fieldset>
   </form>
 </mat-dialog-content>
 
 <mat-divider class="border-2"></mat-divider>
 <mat-dialog-actions align="end">
-  <button mat-button type="button" [mat-dialog-close]="false">Cancelar</button>
-  <button mat-flat-button color="primary" type="submit" form="frmMedico" [disabled]="frmMedico().invalid()">Guardar</button>
+  <button mat-button type="button" [mat-dialog-close]="false">{{ isInfo ? 'Cerrar' : 'Cancelar' }}</button>
+  @if (!isInfo) {
+    <button mat-flat-button color="primary" type="submit" form="frmMedico" [disabled]="frmMedico().invalid()">Guardar</button>
+  }
 </mat-dialog-actions>

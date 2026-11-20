@@ -4,3 +4,6 @@ mysql/
 **/RestRequest/
 .idea/
 docs/
+.gradle/
+**/android/.gradle/
+android/.gradle/

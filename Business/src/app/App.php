@@ -77,23 +77,17 @@ $app->options('/{routes:.+}', function (ServerRequestInterface $request, Respons
 });
 
 $app->add(function (ServerRequestInterface $request, RequestHandlerInterface $handler) use ($app): ResponseInterface {
-    $allowedOrigins = [
-        'http://localhost:4200',
-        'https://localhost',
-        'http://localhost',
-        'capacitor://localhost'
-    ];
-
-    $configuredOrigins = $_ENV['CORS_ALLOWED_ORIGINS'] ?? $_ENV['CORS_ALLOWED_ORIGIN'] ?? '';
-    if ($configuredOrigins !== '') {
-        $allowedOrigins = array_unique(array_merge(
-            $allowedOrigins,
-            array_filter(array_map('trim', explode(',', $configuredOrigins)))
-        ));
-    }
-
     $origin = $request->getHeaderLine('Origin');
-    $isAllowedOrigin = in_array($origin, $allowedOrigins, true);
+    // Orígenes permitidos separados por coma:
+    //  - http://localhost:4200 -> ng serve (web)
+    //  - http://localhost      -> WebView de Capacitor en Android (androidScheme: 'http')
+    //  - https://localhost / capacitor://localhost -> esquemas por defecto de Capacitor (Android / iOS)
+    $allowedOrigins = array_map('trim', explode(',',
+        $_ENV['CORS_ALLOWED_ORIGINS']
+            ?? $_ENV['CORS_ALLOWED_ORIGIN']
+            ?? 'http://localhost:4200,http://localhost:4300,http://localhost,https://localhost,capacitor://localhost'
+    ));
+    $isAllowed = $origin !== '' && in_array($origin, $allowedOrigins, true);
 
     if ($request->getMethod() === 'OPTIONS') {
         $response = $app->getResponseFactory()->createResponse(204);
@@ -101,7 +95,7 @@ $app->add(function (ServerRequestInterface $request, RequestHandlerInterface $ha
         $response = $handler->handle($request);
     }
 
-    if (!$isAllowedOrigin) {
+    if (!$isAllowed) {
         return $response;
     }
 
